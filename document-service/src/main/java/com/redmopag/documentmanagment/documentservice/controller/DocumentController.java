@@ -1,10 +1,13 @@
 package com.redmopag.documentmanagment.documentservice.controller;
 
+import com.redmopag.documentmanagment.documentservice.dto.UploadDocumentResponse;
 import com.redmopag.documentmanagment.documentservice.service.DocumentService;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 @Controller
 @RequestMapping("/documents")
@@ -16,8 +19,9 @@ public class DocumentController {
     }
 
     @PostMapping("/upload")
-    public ResponseEntity<String> uploadDocument(@RequestParam("file") MultipartFile file) {
-        //TODO вызвать метод сервиса
-        return null;
+    @ResponseStatus(HttpStatus.CREATED)
+    public UploadDocumentResponse uploadDocument(@RequestParam("file") MultipartFile file)
+            throws IOException {
+        return documentService.uploadDocument(file);
     }
 }
