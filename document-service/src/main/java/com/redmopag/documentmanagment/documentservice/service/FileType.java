@@ -1,5 +1,8 @@
 package com.redmopag.documentmanagment.documentservice.service;
 
+import lombok.Getter;
+
+@Getter
 public enum FileType {
     JPEG("image/jpeg"),
     PNG("image/png"),
@@ -9,10 +12,6 @@ public enum FileType {
 
     FileType(String mimeType) {
         this.mimeType = mimeType;
-    }
-
-    public String getMimeType() {
-        return mimeType;
     }
 
     public static boolean isValidMimeType(String mimeType) {

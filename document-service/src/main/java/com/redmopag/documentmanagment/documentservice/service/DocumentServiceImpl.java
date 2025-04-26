@@ -2,6 +2,7 @@ package com.redmopag.documentmanagment.documentservice.service;
 
 import com.redmopag.documentmanagment.documentservice.client.*;
 import com.redmopag.documentmanagment.documentservice.dto.*;
+import com.redmopag.documentmanagment.documentservice.exception.DocumentParamsException;
 import com.redmopag.documentmanagment.documentservice.model.*;
 import com.redmopag.documentmanagment.documentservice.repository.DocumentRepository;
 import com.redmopag.documentmanagment.documentservice.utils.DocumentMapper;
@@ -23,12 +24,19 @@ public class DocumentServiceImpl implements DocumentService {
     }
 
     public UploadDocumentResponse uploadDocument(MultipartFile file) throws IOException {
-        FileType.isValidMimeType(file.getContentType());
+        validateMimeType(file);
         String storagePath = documentStorageClient.storeDocument(file.getBytes());
         OcrResponse recognitionResult = ocrClient.recognizeText(file.getBytes());
         Document documentToSave = buildDocument(file, storagePath, recognitionResult);
         Document savedDocument = documentRepository.save(documentToSave);
         return DocumentMapper.INSTANCE.toUploadDocumentResponse(savedDocument);
+    }
+
+    private static void validateMimeType(MultipartFile file) {
+        if(!FileType.isValidMimeType(file.getContentType())) {
+            throw new DocumentParamsException("Invalid mime type of document with name: " +
+                    file.getOriginalFilename());
+        }
     }
 
     private static Document buildDocument(MultipartFile file, String storagePath, OcrResponse recognitionResult) {
