@@ -20,7 +20,7 @@ public class OcrController {
 
     @PostMapping("/recognize")
     @ResponseStatus(HttpStatus.OK)
-    public OcrResponse recognizeText(@RequestBody MultipartFile file)
+    public OcrResponse recognizeText(@RequestParam("file") MultipartFile file)
             throws TesseractException, IOException {
         return ocrService.recognize(file);
     }
