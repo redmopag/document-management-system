@@ -1,6 +1,7 @@
 package com.redmopag.documentmanagment.ocrservice.service;
 
 import com.redmopag.documentmanagment.ocrservice.dto.OcrResponse;
+import com.redmopag.documentmanagment.ocrservice.exception.*;
 import com.redmopag.documentmanagment.ocrservice.utils.DateExtractor;
 import net.sourceforge.tess4j.*;
 import org.jsoup.Jsoup;
@@ -25,7 +26,7 @@ public class RusOcrService {
         this.tesseract = tesseract;
     }
 
-    public OcrResponse recognize(MultipartFile file) throws IOException, TesseractException {
+    public OcrResponse recognize(MultipartFile file) {
         File tempFile = prepareFile(file);
         recognizeText(tempFile);
         extractExpirationDates();
@@ -33,15 +34,24 @@ public class RusOcrService {
         return buildOcrResponse();
     }
 
-    private static File prepareFile(MultipartFile file) throws IOException {
-        File tempFile = File.createTempFile("upload", file.getOriginalFilename());
-        file.transferTo(tempFile);
-        return tempFile;
+    private static File prepareFile(MultipartFile file) {
+        try {
+            File tempFile = File.createTempFile("upload", file.getOriginalFilename());
+            file.transferTo(tempFile);
+            return tempFile;
+        } catch (IOException e) {
+            throw new InvalidFileException("Не удалось прочитать файл: " +
+                    file.getOriginalFilename() + " " + e.getMessage());
+        }
     }
 
-    private void recognizeText(File tempFile) throws TesseractException {
-        hocrContent = tesseract.doOCR(tempFile);
-        plainText = Jsoup.parse(hocrContent).text();
+    private void recognizeText(File tempFile) {
+        try {
+            hocrContent = tesseract.doOCR(tempFile);
+            plainText = Jsoup.parse(hocrContent).text();
+        } catch (TesseractException e) {
+            throw new OcrFailedException("Ошибка при распознавании текста: " + e.getMessage());
+        }
     }
 
     private void extractExpirationDates() {
