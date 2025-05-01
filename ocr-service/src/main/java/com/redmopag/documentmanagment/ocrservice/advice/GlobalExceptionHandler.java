@@ -8,13 +8,13 @@ import org.springframework.web.bind.annotation.*;
 public class GlobalExceptionHandler {
     @ExceptionHandler(InvalidFileException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleFileException(InvalidFileException e) {
+    public ErrorResponse handleFileException() {
         return new ErrorResponse("Не удалось прочитать файл");
     }
 
     @ExceptionHandler(OcrFailedException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleOcrFailedException(OcrFailedException e) {
+    public ErrorResponse handleOcrFailedException() {
         return new ErrorResponse("Не удалось распознать текст");
     }
 }

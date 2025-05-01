@@ -26,7 +26,7 @@ public class DocumentServiceImpl implements DocumentService {
     public UploadDocumentResponse uploadDocument(MultipartFile file) throws IOException {
         validateMimeType(file);
         String storagePath = documentStorageClient.storeDocument(file.getBytes());
-        OcrResponse recognitionResult = ocrClient.recognizeText(file.getBytes());
+        OcrResponse recognitionResult = ocrClient.recognizeText(file.getBytes(), file.getOriginalFilename());
         Document documentToSave = buildDocument(file, storagePath, recognitionResult);
         Document savedDocument = documentRepository.save(documentToSave);
         return DocumentMapper.INSTANCE.toUploadDocumentResponse(savedDocument);
