@@ -50,5 +50,19 @@ services:
     networks:
       - elastic-net
 
+  postgres:
+    image: postgres:15
+    container_name: document_postgres
+    restart: always
+    environment:
+      POSTGRES_DB: documents
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
 volumes:
   minio_data:
+  pgdata:
