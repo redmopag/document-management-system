@@ -1,4 +1,4 @@
-package com.redmopag.documentmanagment.documentservice.service;
+package com.redmopag.documentmanagment.documentservice.service.document;
 
 import com.redmopag.documentmanagment.documentservice.dto.UploadDocumentResponse;
 import org.springframework.web.multipart.MultipartFile;

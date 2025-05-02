@@ -1,7 +1,7 @@
 package com.redmopag.documentmanagment.documentservice.controller;
 
 import com.redmopag.documentmanagment.documentservice.dto.UploadDocumentResponse;
-import com.redmopag.documentmanagment.documentservice.service.DocumentService;
+import com.redmopag.documentmanagment.documentservice.service.document.DocumentService;
 import org.springframework.http.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;

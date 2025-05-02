@@ -3,25 +3,38 @@ package com.redmopag.documentmanagment.documentservice.model;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDateTime;
+import java.time.*;
 
 @Entity
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Table(name = "document_metadata")
 public class Document {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(unique = true)
     private String name;
-    private String storagePath;
-    private String textId;
-    private String type;
+
+    @Column(nullable = false)
+    private String objectKey;
+
+    @Column(nullable = true)
+    private String category;
+
     @Enumerated(EnumType.STRING)
     private DocumentStatus status;
-    private LocalDateTime expirationDate;
+
+    @Column(nullable = true)
+    private LocalDate expirationDate;
+
+    @Column(nullable = false)
     private LocalDateTime uploadedAt;
+
+    @Column(nullable = false)
     private LocalDateTime updatedAt;
 
     @PrePersist
