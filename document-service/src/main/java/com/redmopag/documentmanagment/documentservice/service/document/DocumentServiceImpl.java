@@ -14,6 +14,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.LocalDate;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -23,6 +25,7 @@ public class DocumentServiceImpl implements DocumentService {
     private final StorageService storageService;
     private final DocumentTextService documentTextService;
 
+    @Override
     public UploadDocumentResponse uploadDocument(MultipartFile file) throws IOException {
         validateMimeType(file);
         String objectKey = storageService.upload(file);
@@ -50,5 +53,10 @@ public class DocumentServiceImpl implements DocumentService {
                 .expirationDate(recognitionResult.getExpirationDate())
                 .status(DocumentStatus.PROCESSING)
                 .build();
+    }
+
+    @Override
+    public List<Document> findExpiringAt(LocalDate expirationDate) {
+        return documentRepository.findDocumentByExpirationDate(expirationDate);
     }
 }
