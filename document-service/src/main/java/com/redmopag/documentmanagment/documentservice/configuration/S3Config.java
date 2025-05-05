@@ -4,13 +4,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.*;
 import software.amazon.awssdk.auth.credentials.*;
 import software.amazon.awssdk.regions.Region;
-import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.*;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 
 import java.net.URI;
 
 @Configuration
-public class S3Configuration {
+public class S3Config {
     @Value("${file.storage.url}")
     private String minIoUrl;
 
@@ -36,6 +36,9 @@ public class S3Configuration {
                 .endpointOverride(URI.create(minIoUrl))
                 .region(Region.EU_WEST_3)
                 .credentialsProvider(credentialsProvider)
+                .serviceConfiguration(S3Configuration.builder()
+                        .pathStyleAccessEnabled(true)
+                        .build())
                 .build();
     }
 }

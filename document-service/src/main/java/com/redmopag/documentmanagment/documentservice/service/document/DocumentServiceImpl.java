@@ -31,9 +31,9 @@ public class DocumentServiceImpl implements DocumentService {
     @Override
     public DocumentSummaryResponse uploadDocument(MultipartFile file) throws IOException {
         validateMimeType(file);
-        String objectKey = storageService.upload(file);
+        String documentKey = storageService.upload(file);
         OcrResponse recognitionResult = ocrClient.recognizeFile(file);
-        Document documentToSave = buildDocument(file, objectKey, recognitionResult);
+        Document documentToSave = buildDocument(file, documentKey, recognitionResult);
         Document savedDocument = documentRepository.save(documentToSave);
         documentTextService.saveText(savedDocument.getId(), recognitionResult.getText(),
                 recognitionResult.getHocrContent());
