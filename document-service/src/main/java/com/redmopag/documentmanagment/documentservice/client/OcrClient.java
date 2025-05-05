@@ -5,10 +5,12 @@ import com.redmopag.documentmanagment.documentservice.exception.OcrException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.*;
+import org.springframework.http.client.MultipartBodyBuilder;
 import org.springframework.stereotype.Component;
-import org.springframework.util.*;
 import org.springframework.web.client.RestClient;
-import org.springframework.web.reactive.function.BodyInserters;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 @Component
 public class OcrClient {
@@ -20,41 +22,34 @@ public class OcrClient {
         restClient = restClientBuilder.baseUrl(ocrServiceUrl).build();
     }
 
-    public OcrResponse recognizeText(byte[] fileContent, String filename) {
-        ResponseEntity<OcrResponse> responseEntity = sendRecognitionRequest(fileContent, filename);
+    public OcrResponse recognizeFile(MultipartFile file) throws IOException {
+        ResponseEntity<OcrResponse> responseEntity = sendRecognitionRequest(file);
         if (isResponseSuccessful(responseEntity)) {
             return responseEntity.getBody();
         } else {
-            throw new OcrException("Failed to recognize text in file");
+            throw new OcrException("Не удалось распознать текст в файле: " +
+                    file.getOriginalFilename());
         }
     }
 
-    protected ResponseEntity<OcrResponse> sendRecognitionRequest(byte[] fileContent, String filename) {
+    private ResponseEntity<OcrResponse> sendRecognitionRequest(MultipartFile file)
+            throws IOException {
+        MultipartBodyBuilder bodyBuilder = new MultipartBodyBuilder();
+        bodyBuilder.part("description", "Это описание файла");
+        bodyBuilder.part("file", new ByteArrayResource(file.getBytes()) {
+                    @Override
+                    public String getFilename() {
+                        return file.getOriginalFilename();
+                    }
+                })
+                .contentType(MediaType.TEXT_PLAIN);
         return restClient
                 .post()
                 .uri(RECOGNIZE_URI_PREDICATE)
                 .contentType(MediaType.MULTIPART_FORM_DATA)
-                .body(BodyInserters.fromMultipartData(generateMultipart(fileContent, filename)))
+                .body(bodyBuilder.build())
                 .retrieve()
                 .toEntity(OcrResponse.class);
-    }
-
-    private MultiValueMap<String, HttpEntity<?>> generateMultipart(byte[] fileContent, String filename) {
-        ByteArrayResource resource = new ByteArrayResource(fileContent) {
-            @Override
-            public String getFilename() {
-                return filename;
-            }
-        };
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
-
-        HttpEntity<ByteArrayResource> filePart = new HttpEntity<>(resource, headers);
-
-        MultiValueMap<String, HttpEntity<?>> multipart = new LinkedMultiValueMap<>();
-        multipart.add("file", filePart);
-        return multipart;
     }
 
     private boolean isResponseSuccessful(ResponseEntity<OcrResponse> responseEntity) {

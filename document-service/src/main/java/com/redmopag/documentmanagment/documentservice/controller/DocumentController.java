@@ -1,15 +1,16 @@
 package com.redmopag.documentmanagment.documentservice.controller;
 
-import com.redmopag.documentmanagment.documentservice.dto.UploadDocumentResponse;
+import com.redmopag.documentmanagment.documentservice.dto.document.*;
 import com.redmopag.documentmanagment.documentservice.service.document.DocumentService;
-import org.springframework.http.*;
-import org.springframework.stereotype.Controller;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import software.amazon.awssdk.annotations.NotNull;
 
 import java.io.IOException;
+import java.util.List;
 
-@Controller
+@RestController
 @RequestMapping("/documents")
 public class DocumentController {
     private final DocumentService documentService;
@@ -20,8 +21,20 @@ public class DocumentController {
 
     @PostMapping("/upload")
     @ResponseStatus(HttpStatus.CREATED)
-    public UploadDocumentResponse uploadDocument(@RequestParam("file") MultipartFile file)
+    public DocumentSummaryResponse uploadDocument(@RequestParam("file") MultipartFile file)
             throws IOException {
         return documentService.uploadDocument(file);
+    }
+
+    @GetMapping("/all")
+    @ResponseStatus(HttpStatus.OK)
+    public List<DocumentSummaryResponse> getAllDocuments() {
+        return documentService.getAllDocuments();
+    }
+
+    @GetMapping("/details")
+    @ResponseStatus(HttpStatus.OK)
+    public DocumentDetailsResponse getDocumentDetails(@RequestParam("id") Long id) {
+        return documentService.getDocumentDetails(id);
     }
 }

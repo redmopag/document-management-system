@@ -16,25 +16,28 @@ import java.util.List;
 public class RusOcrService {
     private final ITesseract tesseract;
 
-    private String hocrContent;
-    private String plainText;
-    private List<LocalDate> expirationDates;
-    private LocalDate expirationDate;
-    private String suggestedCategory;
-
     public RusOcrService(ITesseract tesseract) {
         this.tesseract = tesseract;
     }
 
     public OcrResponse recognize(MultipartFile file) {
         File tempFile = prepareFile(file);
-        recognizeText(tempFile);
-        extractExpirationDates();
-        suggestedCategory = "MOCK";
-        return buildOcrResponse();
+        String hocrContent = recognizeText(tempFile);
+        String plainText = Jsoup.parse(hocrContent).text();
+        List<LocalDate> expirationDates = DateExtractor.findAllDates(plainText);
+        LocalDate expirationDate =
+                expirationDates.isEmpty() ? null : expirationDates.get(expirationDates.size() - 1);
+        String suggestedCategory = "MOCK";
+        return OcrResponse.builder()
+                .hocrContent(hocrContent)
+                .text(plainText)
+                .expirationDate(expirationDate)
+                .expirationDates(expirationDates)
+                .category(suggestedCategory)
+                .build();
     }
 
-    private static File prepareFile(MultipartFile file) {
+    private File prepareFile(MultipartFile file) {
         try {
             File tempFile = File.createTempFile("upload", file.getOriginalFilename());
             file.transferTo(tempFile);
@@ -45,27 +48,11 @@ public class RusOcrService {
         }
     }
 
-    private void recognizeText(File tempFile) {
+    private String recognizeText(File tempFile) {
         try {
-            hocrContent = tesseract.doOCR(tempFile);
-            plainText = Jsoup.parse(hocrContent).text();
+            return tesseract.doOCR(tempFile);
         } catch (TesseractException e) {
             throw new OcrFailedException("Ошибка при распознавании текста: " + e.getMessage());
         }
-    }
-
-    private void extractExpirationDates() {
-        expirationDates = DateExtractor.findAllDates(plainText);
-        expirationDate = expirationDates.isEmpty() ? null : expirationDates.get(expirationDates.size() - 1);
-    }
-
-    private OcrResponse buildOcrResponse() {
-        return OcrResponse.builder()
-                .hocrContent(hocrContent)
-                .text(plainText)
-                .expirationDate(expirationDate)
-                .expirationDates(expirationDates)
-                .category(suggestedCategory)
-                .build();
     }
 }

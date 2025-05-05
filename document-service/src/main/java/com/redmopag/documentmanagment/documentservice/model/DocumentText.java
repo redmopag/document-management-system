@@ -1,7 +1,7 @@
 package com.redmopag.documentmanagment.documentservice.model;
 
-import jakarta.persistence.Id;
 import lombok.*;
+import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.*;
 import org.springframework.data.elasticsearch.annotations.Document;
 

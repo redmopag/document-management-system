@@ -1,6 +1,6 @@
 package com.redmopag.documentmanagment.documentservice.service.notifier;
 
-import com.redmopag.documentmanagment.documentservice.dto.DocumentNotificationEvent;
+import com.redmopag.documentmanagment.documentservice.dto.document.DocumentNotificationEvent;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 

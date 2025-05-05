@@ -3,8 +3,6 @@ package com.redmopag.documentmanagment.ocrservice.configuration;
 import net.sourceforge.tess4j.*;
 import org.springframework.context.annotation.*;
 
-import java.util.Collections;
-
 @Configuration
 public class TesseractConfiguration {
     @Bean
@@ -13,7 +11,7 @@ public class TesseractConfiguration {
         tesseract.setDatapath("tesseract/");
         tesseract.setLanguage("rus");
         tesseract.setPageSegMode(1);
-        tesseract.setConfigs(Collections.singletonList("hocr"));
+        tesseract.setVariable("tessedit_create_hocr", "1");
         return tesseract;
     }
 }

@@ -1,6 +1,6 @@
 package com.redmopag.documentmanagment.documentservice.service.storage;
 
-import com.redmopag.documentmanagment.documentservice.client.DocumentStorageClient;
+import com.redmopag.documentmanagment.documentservice.client.storage.DocumentStorageClient;
 import com.redmopag.documentmanagment.documentservice.exception.InvalidFileException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -9,6 +9,8 @@ import java.io.IOException;
 
 @Service
 public class StorageServiceImpl implements StorageService {
+    private final static int EXPIRATION_MINUTES = 10;
+
     private final DocumentStorageClient documentStorageClient;
 
     public StorageServiceImpl(DocumentStorageClient documentStorageClient) {
@@ -27,9 +29,7 @@ public class StorageServiceImpl implements StorageService {
     }
 
     @Override
-    public MultipartFile download(String objectKey) {
-        return null;
+    public String generateLing(String objectKey) {
+        return documentStorageClient.generatePresignedUrl(objectKey, EXPIRATION_MINUTES);
     }
-
-
 }

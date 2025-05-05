@@ -4,6 +4,7 @@ import lombok.Getter;
 
 @Getter
 public enum FileType {
+    JPG("image/jpg"),
     JPEG("image/jpeg"),
     PNG("image/png"),
     PDF("application/pdf");

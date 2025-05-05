@@ -8,4 +8,6 @@ public interface DocumentTextService {
     void saveText(Long documentId, String text, String hocrContent);
 
     List<DocumentText> getTextsByContaining(String text);
+
+    DocumentText getTextById(Long documentId);
 }

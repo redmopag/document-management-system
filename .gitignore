@@ -1,0 +1,4 @@
+.idea
+elasticsearch
+minio_data
+pgdata
