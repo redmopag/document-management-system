@@ -16,6 +16,6 @@ public class DocumentText {
     @Field(type = FieldType.Text)
     private String text;
 
-    @Field(type = FieldType.Text)
+    @Field(type = FieldType.Text, index = false)
     private String hocrContent;
 }

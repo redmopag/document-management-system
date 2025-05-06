@@ -7,9 +7,12 @@ document.addEventListener('DOMContentLoaded', () => {
   const detailsPanel = document.getElementById('documentDetails');
   const showOriginalBtn = document.getElementById('showOriginal');
   const originalPreview = document.getElementById('originalPreview');
+  const searchInput = document.getElementById('searchInput');
+  const searchButton = document.getElementById('searchButton');
 
-  async function fetchDocuments() {
-    const res = await fetch(`${BASE_URL}/documents/all`);
+  // Функция для поиска документов
+  async function searchDocuments(query) {
+    const res = await fetch(`${BASE_URL}/documents/search?text=${query}`);
     const data = await res.json();
 
     documentList.innerHTML = '';
@@ -21,6 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // Отображение деталей документа
   async function showDetails(id) {
     const res = await fetch(`${BASE_URL}/documents/details?id=${id}`);
     const doc = await res.json();
@@ -51,6 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
   }
 
+  // Функция для загрузки документа
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
 
@@ -66,5 +71,29 @@ document.addEventListener('DOMContentLoaded', () => {
     fetchDocuments();
   });
 
-  fetchDocuments();
+  // Обработчик кнопки поиска
+  searchButton.addEventListener('click', () => {
+    const query = searchInput.value.trim();
+    if (query) {
+      searchDocuments(query);
+    } else {
+      fetchDocuments(); // Если поисковый запрос пустой, загружаем все документы
+    }
+  });
+
+  // Функция для загрузки всех документов
+  async function fetchDocuments() {
+    const res = await fetch(`${BASE_URL}/documents/all`);
+    const data = await res.json();
+
+    documentList.innerHTML = '';
+    data.forEach(doc => {
+      const li = document.createElement('li');
+      li.textContent = `${doc.name} (${new Date(doc.updatedAt).toLocaleString()})`;
+      li.addEventListener('click', () => showDetails(doc.id));
+      documentList.appendChild(li);
+    });
+  }
+
+  fetchDocuments(); // Изначальная загрузка всех документов
 });

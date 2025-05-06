@@ -10,4 +10,5 @@ import java.util.List;
 @Repository
 public interface DocumentRepository extends JpaRepository<Document, Long> {
     List<Document> findDocumentByExpirationDate(LocalDate expirationDate);
+    List<Document> findByNameContaining(String name);
 }

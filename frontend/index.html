@@ -7,26 +7,33 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="container">
-        <!-- Форма загрузки документа -->
-        <form id="uploadForm">
-            <h3>Загрузить документ</h3>
-            <input type="file" id="fileInput" name="file" accept="application/pdf, image/*">
-            <button type="submit">Загрузить</button>
-        </form>
+<div class="container">
+    <!-- Форма загрузки документа -->
+    <form id="uploadForm">
+        <h3>Загрузить документ</h3>
+        <input type="file" id="fileInput" name="file" accept="application/pdf, image/*">
+        <button type="submit">Загрузить</button>
+    </form>
 
-        <!-- Список документов -->
-        <ul id="documentList"></ul>
-
-        <!-- Панель с деталями документа -->
-        <div id="documentDetails">
-            <h3>Детали документа</h3>
-            <div id="detailsContent">Выберите документ из списка...</div>
-            <div id="showOriginal">Показать оригинал</div>
-            <div id="originalPreview"></div>
-        </div>
+    <!-- Форма поиска документов -->
+    <div id="searchForm">
+        <h3>Поиск документов</h3>
+        <input type="text" id="searchInput" placeholder="Введите текст для поиска">
+        <button id="searchButton">Искать</button>
     </div>
 
-    <script src="main.js"></script>
+    <!-- Список документов -->
+    <ul id="documentList"></ul>
+
+    <!-- Панель с деталями документа -->
+    <div id="documentDetails">
+        <h3>Детали документа</h3>
+        <div id="detailsContent">Выберите документ из списка...</div>
+        <div id="showOriginal">Показать оригинал</div>
+        <div id="originalPreview"></div>
+    </div>
+</div>
+
+<script src="main.js"></script>
 </body>
 </html>

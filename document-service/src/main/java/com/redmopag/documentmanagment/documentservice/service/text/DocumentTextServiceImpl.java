@@ -23,6 +23,7 @@ public class DocumentTextServiceImpl implements DocumentTextService {
         repository.save(document);
     }
 
+    //TODO: добавить notfound exception
     @Override
     public List<DocumentText> getTextsByContaining(String text) {
         return repository.findByTextContaining(text);

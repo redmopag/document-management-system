@@ -16,7 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDate;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -94,5 +94,28 @@ public class DocumentServiceImpl implements DocumentService {
                 .downloadUrl(originalDocUrl)
                 .hocrText(docText.getHocrContent())
                 .build();
+    }
+
+    //TODO: отредачить метод
+    @Override
+    public List<DocumentSummaryResponse> getDocumentByContaining(String text) {
+        List<DocumentText> docText = documentTextService.getTextsByContaining(text);
+        if (docText.isEmpty()) {
+            List<Document> foundDoc = documentRepository.findByNameContaining(text);
+            if (foundDoc.isEmpty()) {
+                return Collections.emptyList();
+            }
+            return foundDoc.stream()
+                    .map(DocumentMapper.INSTANCE::toDocumentSummaryResponse)
+                    .collect(Collectors.toList());
+        }
+        Iterable<Long> ids = docText.stream().map(DocumentText::getDocumentId).toList();
+        List<Document> docMetadata = documentRepository.findAllById(ids);
+        if (docMetadata.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return docMetadata.stream()
+                .map(DocumentMapper.INSTANCE::toDocumentSummaryResponse)
+                .collect(Collectors.toList());
     }
 }

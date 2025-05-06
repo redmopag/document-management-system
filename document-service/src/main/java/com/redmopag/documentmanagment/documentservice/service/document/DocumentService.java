@@ -16,4 +16,6 @@ public interface DocumentService {
     List<DocumentSummaryResponse> getAllDocuments();
 
     DocumentDetailsResponse getDocumentDetails(Long id);
+
+    List<DocumentSummaryResponse> getDocumentByContaining(String text);
 }
