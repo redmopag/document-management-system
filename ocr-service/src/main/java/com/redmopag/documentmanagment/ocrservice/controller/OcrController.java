@@ -14,10 +14,4 @@ public class OcrController {
     public OcrController(RusOcrService ocrService) {
         this.ocrService = ocrService;
     }
-
-    @PostMapping("/recognize")
-    @ResponseStatus(HttpStatus.OK)
-    public OcrResponse recognizeText(@RequestParam("file") MultipartFile file) {
-        return ocrService.recognize(file);
-    }
 }
