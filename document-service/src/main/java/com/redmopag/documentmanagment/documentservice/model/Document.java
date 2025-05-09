@@ -19,11 +19,11 @@ public class Document {
     @Column(unique = true)
     private String name;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String objectKey;
 
     @Column(nullable = true)
-    private String category;
+    private String textId;
 
     @Enumerated(EnumType.STRING)
     private DocumentStatus status;

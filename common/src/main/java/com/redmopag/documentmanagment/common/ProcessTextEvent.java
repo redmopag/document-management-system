@@ -1,4 +1,4 @@
-package com.redmopag.documentmanagment.ocrservice.dto;
+package com.redmopag.documentmanagment.common;
 
 import lombok.*;
 

@@ -11,5 +11,7 @@
         <module>document-service</module>
         <module>notification-service</module>
         <module>ocr-service</module>
+        <module>common</module>
     </modules>
+
 </project>

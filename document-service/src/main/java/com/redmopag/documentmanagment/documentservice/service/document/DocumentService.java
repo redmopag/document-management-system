@@ -1,5 +1,6 @@
 package com.redmopag.documentmanagment.documentservice.service.document;
 
+import com.redmopag.documentmanagment.common.MetadataEvent;
 import com.redmopag.documentmanagment.documentservice.dto.document.*;
 import com.redmopag.documentmanagment.documentservice.model.Document;
 import org.springframework.web.multipart.MultipartFile;
@@ -15,7 +16,9 @@ public interface DocumentService {
 
     List<DocumentSummaryResponse> getAllDocuments();
 
-    DocumentDetailsResponse getDocumentDetails(Long id);
+//    DocumentDetailsResponse getDocumentDetails(Long id);
 
-    List<DocumentSummaryResponse> getDocumentByContaining(String text);
+//    List<DocumentSummaryResponse> getDocumentByContaining(String text);
+
+    void updateDocumentMetadata(MetadataEvent event);
 }

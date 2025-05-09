@@ -1,9 +1,10 @@
-package com.redmopag.documentmanagment.documentservice.model;
+package com.redmopag.documentmanagment.textservice.model;
 
 import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.*;
-import org.springframework.data.elasticsearch.annotations.Document;
+
+import java.util.UUID;
 
 @Document(indexName = "documents")
 @Data
@@ -11,11 +12,14 @@ import org.springframework.data.elasticsearch.annotations.Document;
 @AllArgsConstructor
 public class DocumentText {
     @Id
-    private Long documentId;
+    private String id = UUID.randomUUID().toString();
 
-    @Field(type = FieldType.Text)
-    private String text;
+    @Field(type = FieldType.Long, index = false)
+    private Long documentId;
 
     @Field(type = FieldType.Text, index = false)
     private String hocrContent;
+
+    @Field(type = FieldType.Text)
+    private String text;
 }

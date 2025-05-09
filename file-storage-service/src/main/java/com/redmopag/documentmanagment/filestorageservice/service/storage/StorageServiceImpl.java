@@ -1,6 +1,6 @@
 package com.redmopag.documentmanagment.filestorageservice.service.storage;
 
-import com.redmopag.documentmanagment.filestorageservice.client.kafka.OcrKafkaClient;
+import com.redmopag.documentmanagment.filestorageservice.kafka.producer.OcrKafkaProducer;
 import com.redmopag.documentmanagment.filestorageservice.client.storage.DocumentStorageClient;
 import com.redmopag.documentmanagment.filestorageservice.exception.InvalidFileException;
 import org.springframework.stereotype.Service;
@@ -13,18 +13,19 @@ public class StorageServiceImpl implements StorageService {
     private final static int EXPIRATION_MINUTES = 10;
 
     private final DocumentStorageClient documentStorageClient;
-    private final OcrKafkaClient ocrKafkaClient;
+    private final OcrKafkaProducer ocrKafkaProducer;
 
-    public StorageServiceImpl(DocumentStorageClient documentStorageClient, OcrKafkaClient ocrKafkaClient) {
+    public StorageServiceImpl(DocumentStorageClient documentStorageClient, OcrKafkaProducer ocrKafkaProducer) {
         this.documentStorageClient = documentStorageClient;
-        this.ocrKafkaClient = ocrKafkaClient;
+        this.ocrKafkaProducer = ocrKafkaProducer;
     }
 
     @Override
     public void upload(Long fileId, MultipartFile file) {
         try {
             String objectKey = uploadFile(file);
-            ocrKafkaClient.ocrFile(fileId, objectKey, generateLink(objectKey));
+            ocrKafkaProducer.ocrFile(fileId, objectKey, generateLink(objectKey));
+            System.out.println("Документ " + fileId + " помещён в хранилище. Ключ: " + objectKey);
         } catch (IOException e) {
             throw new InvalidFileException(e.getMessage());
         }

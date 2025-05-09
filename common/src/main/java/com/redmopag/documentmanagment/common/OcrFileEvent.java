@@ -1,10 +1,10 @@
-package com.redmopag.documentmanagment.filestorageservice.dto;
+package com.redmopag.documentmanagment.common;
 
 import lombok.*;
 
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 public class OcrFileEvent {
     private Long fileId;
     private String objectKey;

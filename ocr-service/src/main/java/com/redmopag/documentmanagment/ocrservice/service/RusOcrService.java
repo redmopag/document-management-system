@@ -1,16 +1,13 @@
 package com.redmopag.documentmanagment.ocrservice.service;
 
+import com.redmopag.documentmanagment.common.*;
 import com.redmopag.documentmanagment.ocrservice.client.FileDownloader;
-import com.redmopag.documentmanagment.ocrservice.dto.*;
-import com.redmopag.documentmanagment.ocrservice.exception.*;
-import com.redmopag.documentmanagment.ocrservice.utils.DateExtractor;
+import com.redmopag.documentmanagment.ocrservice.exception.OcrFailedException;
 import net.sourceforge.tess4j.*;
 import org.jsoup.Jsoup;
 import org.springframework.stereotype.Service;
 
-import java.io.*;
-import java.time.LocalDate;
-import java.util.List;
+import java.io.File;
 
 @Service
 public class RusOcrService implements OcrService{
@@ -27,10 +24,7 @@ public class RusOcrService implements OcrService{
         File tempFile = fileDownloader.downloadFile(event.getDownloadUrl());
         String hocrContent = recognizeText(tempFile);
         String plainText = Jsoup.parse(hocrContent).text();
-        List<LocalDate> expirationDates = DateExtractor.findAllDates(plainText);
-        LocalDate expirationDate =
-                expirationDates.isEmpty() ? null : expirationDates.get(expirationDates.size() - 1);
-        String suggestedCategory = "MOCK";
+        System.out.println("Документ " + event.getFileId() + " распознан");
         return ProcessTextEvent.builder()
                 .fileId(event.getFileId())
                 .objectKey(event.getObjectKey())

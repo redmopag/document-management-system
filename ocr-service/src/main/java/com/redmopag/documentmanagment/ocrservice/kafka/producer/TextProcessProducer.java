@@ -1,6 +1,6 @@
 package com.redmopag.documentmanagment.ocrservice.kafka.producer;
 
-import com.redmopag.documentmanagment.ocrservice.dto.ProcessTextEvent;
+import com.redmopag.documentmanagment.common.ProcessTextEvent;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 

@@ -1,14 +1,14 @@
-package com.redmopag.documentmanagment.filestorageservice.client.kafka;
+package com.redmopag.documentmanagment.filestorageservice.kafka.producer;
 
-import com.redmopag.documentmanagment.filestorageservice.dto.OcrFileEvent;
+import com.redmopag.documentmanagment.common.OcrFileEvent;
 import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.*;
 
-@Component
-public class OcrKafkaClient {
+@Service
+public class OcrKafkaProducer {
     private final KafkaTemplate<String, OcrFileEvent> kafkaTemplate;
 
-    public OcrKafkaClient(KafkaTemplate<String, OcrFileEvent> kafkaTemplate) {
+    public OcrKafkaProducer(KafkaTemplate<String, OcrFileEvent> kafkaTemplate) {
         this.kafkaTemplate = kafkaTemplate;
     }
 

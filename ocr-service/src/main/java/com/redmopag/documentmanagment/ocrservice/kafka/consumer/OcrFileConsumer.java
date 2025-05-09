@@ -1,6 +1,6 @@
 package com.redmopag.documentmanagment.ocrservice.kafka.consumer;
 
-import com.redmopag.documentmanagment.ocrservice.dto.*;
+import com.redmopag.documentmanagment.common.OcrFileEvent;
 import com.redmopag.documentmanagment.ocrservice.kafka.producer.TextProcessProducer;
 import com.redmopag.documentmanagment.ocrservice.service.OcrService;
 import org.springframework.kafka.annotation.KafkaListener;

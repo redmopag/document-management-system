@@ -1,6 +1,6 @@
 package com.redmopag.documentmanagment.documentservice.service.storage;
 
-import com.redmopag.documentmanagment.documentservice.client.storage.DocumentStorageClient;
+import com.redmopag.documentmanagment.documentservice.client.FileStorageClient;
 import com.redmopag.documentmanagment.documentservice.exception.InvalidFileException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -11,18 +11,16 @@ import java.io.IOException;
 public class StorageServiceImpl implements StorageService {
     private final static int EXPIRATION_MINUTES = 10;
 
-    private final DocumentStorageClient documentStorageClient;
+    private final FileStorageClient fileStorageClient;
 
-    public StorageServiceImpl(DocumentStorageClient documentStorageClient) {
-        this.documentStorageClient = documentStorageClient;
+    public StorageServiceImpl(FileStorageClient fileStorageClient) {
+        this.fileStorageClient = fileStorageClient;
     }
 
     @Override
-    public String upload(MultipartFile file) {
+    public void upload(Long fileId, MultipartFile file) {
         try {
-            byte[] content = file.getBytes();
-            String fileName = file.getOriginalFilename();
-            return documentStorageClient.upload(content, fileName);
+            fileStorageClient.sendFile(fileId, file).subscribe();
         } catch (IOException e) {
             throw new InvalidFileException(e.getMessage());
         }
@@ -30,6 +28,6 @@ public class StorageServiceImpl implements StorageService {
 
     @Override
     public String generateLing(String objectKey) {
-        return documentStorageClient.generatePresignedUrl(objectKey, EXPIRATION_MINUTES);
+        return fileStorageClient.generatePresignedUrl(objectKey, EXPIRATION_MINUTES);
     }
 }
