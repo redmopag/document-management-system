@@ -12,8 +12,8 @@ public class OcrKafkaProducer {
         this.kafkaTemplate = kafkaTemplate;
     }
 
-    public void ocrFile(Long fileId, String objectKey, String downloadUrl){
-        OcrFileEvent ocrFileEvent = new OcrFileEvent(fileId, objectKey, downloadUrl);
+    public void ocrFile(Long fileId, String objectKey, String downloadUrl, String filePostfix){
+        OcrFileEvent ocrFileEvent = new OcrFileEvent(fileId, objectKey, downloadUrl, filePostfix);
         kafkaTemplate.send("ocr-file", ocrFileEvent);
     }
 }

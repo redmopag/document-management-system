@@ -24,7 +24,8 @@ public class StorageServiceImpl implements StorageService {
     public void upload(Long fileId, MultipartFile file) {
         try {
             String objectKey = uploadFile(file);
-            ocrKafkaProducer.ocrFile(fileId, objectKey, generateLink(objectKey));
+            var filePostfix = file.getOriginalFilename().split("\\.")[1];
+            ocrKafkaProducer.ocrFile(fileId, objectKey, generateLink(objectKey), filePostfix);
             System.out.println("Документ " + fileId + " помещён в хранилище. Ключ: " + objectKey);
         } catch (IOException e) {
             throw new InvalidFileException(e.getMessage());

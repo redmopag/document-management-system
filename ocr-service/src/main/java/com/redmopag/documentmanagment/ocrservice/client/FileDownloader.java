@@ -1,31 +1,28 @@
 package com.redmopag.documentmanagment.ocrservice.client;
 
+import com.redmopag.documentmanagment.ocrservice.exception.InvalidFileException;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
 
 import java.io.*;
+import java.net.*;
 
 @Component
 public class FileDownloader {
-    private final WebClient webClient = WebClient.builder().build();
-
-    public File downloadFile(String url) {
-        return webClient.get()
-                .uri(url)
-                .retrieve()
-                .bodyToMono(InputStream.class)
-                .flatMap(inputStream -> {
-                    try {
-                        File tempFile = File.createTempFile("download-", ".tmp");
-                        try (FileOutputStream outputStream = new FileOutputStream(tempFile)){
-                            inputStream.transferTo(outputStream);
-                        }
-                        return Mono.just(tempFile);
-                    } catch (IOException e) {
-                        return Mono.error(e);
-                    }
-                })
-                .block();
+    /* Use the JDK HttpURLConnection (since v1.1) class to do the download. */
+    public File downloadFile(String presignedUrlString, String filePostfix) {
+        try {
+            URL presignedUrl = new URL(presignedUrlString);
+            HttpURLConnection connection = (HttpURLConnection) presignedUrl.openConnection();
+            connection.setRequestMethod("GET");
+            try (InputStream inputStream = connection.getInputStream()) {
+                File tempFile = File.createTempFile("download-", "." + filePostfix);
+                try (FileOutputStream outputStream = new FileOutputStream(tempFile)) {
+                    inputStream.transferTo(outputStream);
+                }
+                return tempFile;
+            }
+        } catch (IOException e) {
+            throw new InvalidFileException(e.getMessage());
+        }
     }
 }

@@ -9,28 +9,25 @@ import java.time.Duration;
 
 @Component
 public class S3Director {
-    @Value("${file.storage.bucket}")
-    private String bucket;
-
-    public PutObjectRequest buildPutRequest(String documentKey) {
+    public PutObjectRequest buildPutRequest(String bucketName, String documentKey) {
         return PutObjectRequest.builder()
-                .bucket(bucket)
+                .bucket(bucketName)
                 .key(documentKey)
                 .contentType("application/octet-stream")
                 .build();
     }
 
-    public GetObjectRequest buildGetRequest(String documentKey) {
+    public GetObjectRequest buildGetRequest(String bucketName, String documentKey) {
         return GetObjectRequest.builder()
-                .bucket(bucket)
+                .bucket(bucketName)
                 .key(documentKey)
                 .build();
     }
 
     public GetObjectPresignRequest buildPresignReqeust(int expirationMinutes, GetObjectRequest getObjectRequest) {
         return GetObjectPresignRequest.builder()
-                .getObjectRequest(getObjectRequest)
                 .signatureDuration(Duration.ofMinutes(expirationMinutes))
+                .getObjectRequest(getObjectRequest)
                 .build();
     }
 }

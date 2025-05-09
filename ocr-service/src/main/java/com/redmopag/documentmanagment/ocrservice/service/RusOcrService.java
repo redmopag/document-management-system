@@ -21,7 +21,9 @@ public class RusOcrService implements OcrService{
 
     @Override
     public ProcessTextEvent recognize(OcrFileEvent event) {
-        File tempFile = fileDownloader.downloadFile(event.getDownloadUrl());
+        System.out.println("Скачивание файла по url: " + event.getDownloadUrl());
+        File tempFile = fileDownloader.downloadFile(event.getDownloadUrl(), event.getFilePostfix());
+        System.out.println("Скачан файл: " + tempFile.getName());
         String hocrContent = recognizeText(tempFile);
         String plainText = Jsoup.parse(hocrContent).text();
         System.out.println("Документ " + event.getFileId() + " распознан");

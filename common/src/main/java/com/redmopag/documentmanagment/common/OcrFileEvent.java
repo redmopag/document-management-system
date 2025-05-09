@@ -9,4 +9,5 @@ public class OcrFileEvent {
     private Long fileId;
     private String objectKey;
     private String downloadUrl;
+    private String filePostfix;
 }

@@ -24,7 +24,7 @@ public class S3Config {
     public S3Client s3Client(StaticCredentialsProvider credentialsProvider) {
         return S3Client.builder()
                 .endpointOverride(URI.create(minIoUrl))
-                .region(Region.EU_WEST_3)
+                .region(Region.EUSC_DE_EAST_1)
                 .credentialsProvider(credentialsProvider)
                 .forcePathStyle(true)
                 .build();
@@ -34,7 +34,7 @@ public class S3Config {
     public S3Presigner s3Presigner(StaticCredentialsProvider credentialsProvider) {
         return S3Presigner.builder()
                 .endpointOverride(URI.create(minIoUrl))
-                .region(Region.EU_WEST_3)
+                .region(Region.EUSC_DE_EAST_1)
                 .credentialsProvider(credentialsProvider)
                 .serviceConfiguration(S3Configuration.builder()
                         .pathStyleAccessEnabled(true)
