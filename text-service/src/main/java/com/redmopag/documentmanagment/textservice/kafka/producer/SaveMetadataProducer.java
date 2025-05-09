@@ -1,6 +1,6 @@
 package com.redmopag.documentmanagment.textservice.kafka.producer;
 
-import com.redmopag.documentmanagment.textservice.dto.MetadataEvent;
+import com.redmopag.documentmanagment.common.MetadataEvent;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 

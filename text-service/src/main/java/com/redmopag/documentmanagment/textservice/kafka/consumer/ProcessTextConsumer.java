@@ -1,7 +1,6 @@
 package com.redmopag.documentmanagment.textservice.kafka.consumer;
 
 import com.redmopag.documentmanagment.common.*;
-import com.redmopag.documentmanagment.textservice.dto.*;
 import com.redmopag.documentmanagment.textservice.kafka.producer.SaveMetadataProducer;
 import com.redmopag.documentmanagment.textservice.service.IndexService;
 import org.springframework.kafka.annotation.KafkaListener;
