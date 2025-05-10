@@ -1,5 +1,6 @@
 package com.redmopag.documentmanagment.filestorageservice.service.storage;
 
+import com.redmopag.documentmanagment.common.GenerateLinkResponse;
 import com.redmopag.documentmanagment.filestorageservice.kafka.producer.OcrKafkaProducer;
 import com.redmopag.documentmanagment.filestorageservice.client.storage.DocumentStorageClient;
 import com.redmopag.documentmanagment.filestorageservice.exception.InvalidFileException;
@@ -25,7 +26,10 @@ public class StorageServiceImpl implements StorageService {
         try {
             String objectKey = uploadFile(file);
             var filePostfix = file.getOriginalFilename().split("\\.")[1];
-            ocrKafkaProducer.ocrFile(fileId, objectKey, generateLink(objectKey), filePostfix);
+            ocrKafkaProducer.ocrFile(fileId,
+                    objectKey,
+                    documentStorageClient.generatePresignedUrl(objectKey, EXPIRATION_MINUTES),
+                    filePostfix);
             System.out.println("Документ " + fileId + " помещён в хранилище. Ключ: " + objectKey);
         } catch (IOException e) {
             throw new InvalidFileException(e.getMessage());
@@ -39,7 +43,8 @@ public class StorageServiceImpl implements StorageService {
     }
 
     @Override
-    public String generateLink(String objectKey) {
-        return documentStorageClient.generatePresignedUrl(objectKey, EXPIRATION_MINUTES);
+    public GenerateLinkResponse generateLink(String objectKey) {
+        var url = documentStorageClient.generatePresignedUrl(objectKey, EXPIRATION_MINUTES);
+        return new GenerateLinkResponse(url);
     }
 }

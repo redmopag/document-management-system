@@ -32,15 +32,15 @@ public class DocumentController {
         return documentService.getAllDocuments();
     }
 
-    /*@GetMapping("/details")
+    @GetMapping("/details")
     @ResponseStatus(HttpStatus.OK)
     public DocumentDetailsResponse getDocumentDetails(@RequestParam("id") Long id) {
         return documentService.getDocumentDetails(id);
-    }*/
+    }
 
-//    @GetMapping("/search")
-//    @ResponseStatus(HttpStatus.OK)
-//    public List<DocumentSummaryResponse> getDocumentByContaining(@RequestParam("text") String text) {
-//        return documentService.getDocumentByContaining(text);
-//    }
+    @GetMapping("/search")
+    @ResponseStatus(HttpStatus.OK)
+    public List<DocumentSummaryResponse> getDocumentByContaining(@RequestParam("text") String text) {
+        return documentService.getDocumentsByContaining(text);
+    }
 }

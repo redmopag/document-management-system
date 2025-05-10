@@ -16,9 +16,9 @@ public interface DocumentService {
 
     List<DocumentSummaryResponse> getAllDocuments();
 
-//    DocumentDetailsResponse getDocumentDetails(Long id);
+    DocumentDetailsResponse getDocumentDetails(Long id);
 
-//    List<DocumentSummaryResponse> getDocumentByContaining(String text);
+    List<DocumentSummaryResponse> getDocumentsByContaining(String text);
 
     void updateDocumentMetadata(MetadataEvent event);
 }

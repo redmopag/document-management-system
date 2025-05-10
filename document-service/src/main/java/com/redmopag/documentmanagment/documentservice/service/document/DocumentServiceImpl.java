@@ -1,12 +1,13 @@
 package com.redmopag.documentmanagment.documentservice.service.document;
 
-import com.redmopag.documentmanagment.common.MetadataEvent;
+import com.redmopag.documentmanagment.common.*;
 import com.redmopag.documentmanagment.documentservice.dto.document.*;
 import com.redmopag.documentmanagment.documentservice.exception.*;
 import com.redmopag.documentmanagment.documentservice.model.*;
 import com.redmopag.documentmanagment.documentservice.repository.DocumentRepository;
 import com.redmopag.documentmanagment.documentservice.service.FileType;
 import com.redmopag.documentmanagment.documentservice.service.storage.StorageService;
+import com.redmopag.documentmanagment.documentservice.service.text.TextService;
 import com.redmopag.documentmanagment.documentservice.utils.DocumentMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -22,6 +23,7 @@ import java.util.stream.Collectors;
 public class DocumentServiceImpl implements DocumentService {
     private final DocumentRepository documentRepository;
     private final StorageService storageService;
+    private final TextService textService;
 
     @Override
     public DocumentSummaryResponse uploadDocument(MultipartFile file) {
@@ -58,53 +60,38 @@ public class DocumentServiceImpl implements DocumentService {
                 .collect(Collectors.toList());
     }
 
-//    @Override
-//    public DocumentDetailsResponse getDocumentDetails(Long id) {
-//        Document doc = getDocumentById(id);
-//        DocumentText docText = documentTextService.getTextById(id);
-//        String originalDocUrl = storageService.generateLing(doc.getObjectKey());
-//        return buildDocumentDetailsResponse(doc, originalDocUrl, docText);
-//    }
-
-    private Document getDocumentById(Long id) {
-        return documentRepository.findById(id)
-                .orElseThrow(() -> new DocumentNotFoundException(id));
+    @Override
+    public DocumentDetailsResponse getDocumentDetails(Long id) {
+        Document doc = getDocumentById(id);
+        TextResponse docText = textService.getTextById(doc.getTextId());
+        String originalDocUrl = storageService.getDownloadUrl(doc.getObjectKey());
+        return buildDocumentDetailsResponse(doc, originalDocUrl, docText.getHocrContent());
     }
 
-//    private static DocumentDetailsResponse buildDocumentDetailsResponse(
-//            Document doc, String originalDocUrl, DocumentText docText) {
-//        return DocumentDetailsResponse.builder()
-//                .id(doc.getId())
-//                .name(doc.getName())
-//                .createdAt(doc.getUploadedAt())
-//                .lastModified(doc.getUpdatedAt())
-//                .downloadUrl(originalDocUrl)
-//                .hocrText(docText.getHocrContent())
-//                .build();
-//    }
+    private DocumentDetailsResponse buildDocumentDetailsResponse(
+            Document doc, String originalDocUrl, String hocrContent) {
+        return DocumentDetailsResponse.builder()
+                .id(doc.getId())
+                .name(doc.getName())
+                .createdAt(doc.getUploadedAt())
+                .lastModified(doc.getUpdatedAt())
+                .downloadUrl(originalDocUrl)
+                .hocrText(hocrContent)
+                .build();
+    }
 
-    /*//TODO: отредачить метод
     @Override
-    public List<DocumentSummaryResponse> getDocumentByContaining(String text) {
-        List<DocumentText> docText = documentTextService.getTextsByContaining(text);
+    public List<DocumentSummaryResponse> getDocumentsByContaining(String text) {
+        List<TextResponse> docText = textService.getTextByContaining(text);
         if (docText.isEmpty()) {
-            List<Document> foundDoc = documentRepository.findByNameContaining(text);
-            if (foundDoc.isEmpty()) {
-                return Collections.emptyList();
-            }
-            return foundDoc.stream()
-                    .map(DocumentMapper.INSTANCE::toDocumentSummaryResponse)
-                    .collect(Collectors.toList());
-        }
-        Iterable<Long> ids = docText.stream().map(DocumentText::getDocumentId).toList();
-        List<Document> docMetadata = documentRepository.findAllById(ids);
-        if (docMetadata.isEmpty()) {
             return Collections.emptyList();
         }
-        return docMetadata.stream()
+        Iterable<Long> ids = docText.stream().map(TextResponse::getDocumentId).collect(Collectors.toList());
+        return documentRepository.findAllById(ids)
+                .stream()
                 .map(DocumentMapper.INSTANCE::toDocumentSummaryResponse)
                 .collect(Collectors.toList());
-    }*/
+    }
 
     @Transactional
     @Override
@@ -122,5 +109,10 @@ public class DocumentServiceImpl implements DocumentService {
         document.setTextId(event.getTextId());
         document.setStatus(DocumentStatus.CONFIRMED);
         return document;
+    }
+
+    private Document getDocumentById(Long id) {
+        return documentRepository.findById(id)
+                .orElseThrow(() -> new DocumentNotFoundException(id));
     }
 }

@@ -1,5 +1,6 @@
 package com.redmopag.documentmanagment.documentservice.service.storage;
 
+import com.redmopag.documentmanagment.common.GenerateLinkResponse;
 import com.redmopag.documentmanagment.documentservice.client.FileStorageClient;
 import com.redmopag.documentmanagment.documentservice.exception.InvalidFileException;
 import org.springframework.stereotype.Service;
@@ -9,8 +10,6 @@ import java.io.IOException;
 
 @Service
 public class StorageServiceImpl implements StorageService {
-    private final static int EXPIRATION_MINUTES = 10;
-
     private final FileStorageClient fileStorageClient;
 
     public StorageServiceImpl(FileStorageClient fileStorageClient) {
@@ -27,7 +26,8 @@ public class StorageServiceImpl implements StorageService {
     }
 
     @Override
-    public String generateLing(String objectKey) {
-        return fileStorageClient.generatePresignedUrl(objectKey, EXPIRATION_MINUTES);
+    public String getDownloadUrl(String objectKey) {
+        GenerateLinkResponse response = fileStorageClient.generatePresignedUrl(objectKey);
+        return response.getDownloadUrl();
     }
 }

@@ -1,5 +1,6 @@
 package com.redmopag.documentmanagment.filestorageservice.controller;
 
+import com.redmopag.documentmanagment.common.GenerateLinkResponse;
 import com.redmopag.documentmanagment.filestorageservice.service.storage.StorageService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -19,5 +20,11 @@ public class StorageController {
     public void upload(@RequestParam("file-id") Long fileId,
                        @RequestParam("file") MultipartFile file) {
         storageService.upload(fileId, file);
+    }
+
+    @GetMapping("/link")
+    @ResponseStatus(HttpStatus.CREATED)
+    public GenerateLinkResponse generateLink(@RequestParam("object-key") String objectKey) {
+        return storageService.generateLink(objectKey);
     }
 }

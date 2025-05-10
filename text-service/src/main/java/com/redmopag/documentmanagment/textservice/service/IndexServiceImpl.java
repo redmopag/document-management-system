@@ -1,10 +1,13 @@
 package com.redmopag.documentmanagment.textservice.service;
 
 import com.redmopag.documentmanagment.common.*;
+import com.redmopag.documentmanagment.textservice.exception.NotFoundException;
 import com.redmopag.documentmanagment.textservice.model.DocumentText;
 import com.redmopag.documentmanagment.textservice.repository.DocumentTextRepository;
 import com.redmopag.documentmanagment.textservice.utils.mapper.DocumentTextMapper;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class IndexServiceImpl implements IndexService {
@@ -28,5 +31,21 @@ public class IndexServiceImpl implements IndexService {
         return new MetadataEvent(processTextEvent.getFileId(),
                 savedDocument.getId(),
                 processTextEvent.getObjectKey());
+    }
+
+    @Override
+    public List<TextResponse> search(String text) {
+        System.out.println("Поиск текста " + text);
+        return documentTextRepository.findByTextContaining(text)
+                .stream()
+                .map(DocumentTextMapper.INSTANCE::toTextResponse)
+                .toList();
+    }
+
+    @Override
+    public TextResponse getDocumentTextById(String id) {
+        var docText = documentTextRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Текст с id: " + id + " не найден"));
+        return DocumentTextMapper.INSTANCE.toTextResponse(docText);
     }
 }
