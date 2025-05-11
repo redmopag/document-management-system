@@ -10,4 +10,6 @@ public interface IndexService {
     List<TextResponse> search(String text);
 
     TextResponse getDocumentTextById(String id);
+
+    void deleteText(DeletedFile file);
 }

@@ -2,7 +2,9 @@ package com.redmopag.documentmanagment.documentservice.service.document;
 
 import com.redmopag.documentmanagment.common.*;
 import com.redmopag.documentmanagment.documentservice.dto.document.*;
-import com.redmopag.documentmanagment.documentservice.exception.*;
+import com.redmopag.documentmanagment.documentservice.exception.badrequest.*;
+import com.redmopag.documentmanagment.documentservice.exception.notFound.DocumentNotFoundException;
+import com.redmopag.documentmanagment.documentservice.kafka.producer.DeleteProducer;
 import com.redmopag.documentmanagment.documentservice.model.*;
 import com.redmopag.documentmanagment.documentservice.repository.DocumentRepository;
 import com.redmopag.documentmanagment.documentservice.service.FileType;
@@ -22,12 +24,17 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class DocumentServiceImpl implements DocumentService {
     private final DocumentRepository documentRepository;
+    private final DeleteProducer deleteProducer;
     private final StorageService storageService;
     private final TextService textService;
 
     @Override
     public DocumentSummaryResponse uploadDocument(MultipartFile file) {
         validateMimeType(file);
+        var foundDoc = documentRepository.findByName(file.getOriginalFilename());
+        if (foundDoc.isPresent()) {
+            return DocumentMapper.INSTANCE.toDocumentSummaryResponse(foundDoc.get());
+        }
         var savedDocument = documentRepository.save(buildDocument(file));
         storageService.upload(savedDocument.getId(), file);
         System.out.println("Сохранён документ: " + savedDocument.getName() + " - " + savedDocument.getId());
@@ -36,7 +43,7 @@ public class DocumentServiceImpl implements DocumentService {
 
     private void validateMimeType(MultipartFile file) {
         if(!FileType.isValidMimeType(file.getContentType())) {
-            throw new DocumentParamsException("Invalid mime type of document with name: " +
+            throw new DocumentParamsException("Неверный тип документа: " +
                     file.getOriginalFilename());
         }
     }
@@ -114,5 +121,33 @@ public class DocumentServiceImpl implements DocumentService {
     private Document getDocumentById(Long id) {
         return documentRepository.findById(id)
                 .orElseThrow(() -> new DocumentNotFoundException(id));
+    }
+
+    //TODO: переделать на флаг удаления и окончательное удаление после подтверждения от других сервисов
+    @Override
+    public void deleteDocument(Long id) {
+        try {
+            var doc = getDocumentById(id);
+            if (!doc.getStatus().equals(DocumentStatus.CONFIRMED)) {
+                throw new NotAllowedFileStatusException("Файл " + doc.getName() + " ещё не обработан");
+            }
+            var deletedFile = new DeletedFile(doc.getId(), doc.getObjectKey());
+            deleteProducer.fileDeleted(deletedFile);
+            documentRepository.deleteById(id);
+        } catch (DocumentNotFoundException ignored){}
+    }
+
+    @Override
+    public void updateDocument(UpdateMetadataRequest request) {
+        var doc = getDocumentById(request.getId());
+        if (request.getName() != null) {
+            doc.setName(request.getName());
+        }
+        if (request.getCategory() != null) {
+            doc.setCategory(request.getCategory());
+        }
+        if (request.getExpirationDate() != null) {
+            doc.setExpirationDate(request.getExpirationDate());
+        }
     }
 }

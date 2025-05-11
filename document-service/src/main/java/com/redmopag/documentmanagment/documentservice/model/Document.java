@@ -16,7 +16,7 @@ public class Document {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true)
+    @Column(unique = false)
     private String name;
 
     @Column(nullable = true)
@@ -27,6 +27,9 @@ public class Document {
 
     @Enumerated(EnumType.STRING)
     private DocumentStatus status;
+
+    @Column(nullable = true)
+    private String category;
 
     @Column(nullable = true)
     private LocalDate expirationDate;

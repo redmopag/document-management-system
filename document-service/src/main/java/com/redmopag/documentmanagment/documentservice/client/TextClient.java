@@ -13,12 +13,11 @@ public class TextClient {
     private static final String SEARCH_TEXT_URL = "/text/search";
     private static final String GET_TEXT_BY_ID_URL = "/text";
 
-    @Value("${text.service.url}")
-    private String textServiceUrl;
-
     private final RestClient restClient;
 
-    public TextClient(RestClient.Builder restClientBuilder) {
+    public TextClient(
+            @Value(("${text.service.url}")) String textServiceUrl,
+            RestClient.Builder restClientBuilder) {
         this.restClient = restClientBuilder.baseUrl(textServiceUrl).build();
     }
 

@@ -11,4 +11,6 @@ public interface DocumentTextRepository extends ElasticsearchRepository<Document
     List<DocumentText> findByTextContaining(String text);
 
     Optional<DocumentText> findById(String id);
+
+    void deleteAllByDocumentId(Long documentId);
 }

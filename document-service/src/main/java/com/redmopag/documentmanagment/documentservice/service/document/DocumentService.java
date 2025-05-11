@@ -21,4 +21,8 @@ public interface DocumentService {
     List<DocumentSummaryResponse> getDocumentsByContaining(String text);
 
     void updateDocumentMetadata(MetadataEvent event);
+
+    void deleteDocument(Long id);
+
+    void updateDocument(UpdateMetadataRequest request);
 }

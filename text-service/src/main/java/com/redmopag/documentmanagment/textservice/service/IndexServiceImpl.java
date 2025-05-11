@@ -48,4 +48,11 @@ public class IndexServiceImpl implements IndexService {
                 .orElseThrow(() -> new NotFoundException("Текст с id: " + id + " не найден"));
         return DocumentTextMapper.INSTANCE.toTextResponse(docText);
     }
+
+    @Override
+    public void deleteText(DeletedFile file) {
+        var docId = file.getDocumentId();
+        documentTextRepository.deleteAllByDocumentId(docId);
+        System.out.println("Тексты с id " + docId + " удалены");
+    }
 }

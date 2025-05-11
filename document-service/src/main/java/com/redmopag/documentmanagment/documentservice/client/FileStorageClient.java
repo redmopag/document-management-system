@@ -23,11 +23,10 @@ public class FileStorageClient {
     private final WebClient webClient;
     private final RestClient restClient;
 
-    @Value("${file.storage.service.url}")
-    private String storageFileBaseUrl;
-
-    public FileStorageClient(WebClient.Builder webClientBuilder,
-                             RestClient.Builder restClientBuilder) {
+    public FileStorageClient(
+            @Value("${file.storage.service.url}") String storageFileBaseUrl,
+            WebClient.Builder webClientBuilder,
+            RestClient.Builder restClientBuilder) {
         this.webClient = webClientBuilder.baseUrl(storageFileBaseUrl).build();
         this.restClient = restClientBuilder.baseUrl(storageFileBaseUrl).build();
     }

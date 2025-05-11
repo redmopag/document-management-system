@@ -30,4 +30,11 @@ public class S3Director {
                 .getObjectRequest(getObjectRequest)
                 .build();
     }
+
+    public DeleteObjectRequest buildDeleteRequest(String bucketName, String documentKey) {
+        return DeleteObjectRequest.builder()
+                .bucket(bucketName)
+                .key(documentKey)
+                .build();
+    }
 }

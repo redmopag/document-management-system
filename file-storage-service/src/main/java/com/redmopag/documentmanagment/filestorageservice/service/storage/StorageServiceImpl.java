@@ -1,6 +1,6 @@
 package com.redmopag.documentmanagment.filestorageservice.service.storage;
 
-import com.redmopag.documentmanagment.common.GenerateLinkResponse;
+import com.redmopag.documentmanagment.common.*;
 import com.redmopag.documentmanagment.filestorageservice.kafka.producer.OcrKafkaProducer;
 import com.redmopag.documentmanagment.filestorageservice.client.storage.DocumentStorageClient;
 import com.redmopag.documentmanagment.filestorageservice.exception.InvalidFileException;
@@ -46,5 +46,10 @@ public class StorageServiceImpl implements StorageService {
     public GenerateLinkResponse generateLink(String objectKey) {
         var url = documentStorageClient.generatePresignedUrl(objectKey, EXPIRATION_MINUTES);
         return new GenerateLinkResponse(url);
+    }
+
+    @Override
+    public void deleteFile(DeletedFile file) {
+        documentStorageClient.deleteFile(file.getObjectKey());
     }
 }

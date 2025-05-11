@@ -21,7 +21,7 @@ public class TextController {
         return indexService.search(text);
     }
 
-    @GetMapping("text")
+    @GetMapping("/text")
     @ResponseStatus(HttpStatus.OK)
     public TextResponse getTextById(@RequestParam("id") String id) {
         return indexService.getDocumentTextById(id);

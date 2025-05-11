@@ -5,10 +5,13 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
-import java.util.List;
+import java.util.*;
 
 @Repository
 public interface DocumentRepository extends JpaRepository<Document, Long> {
     List<Document> findDocumentByExpirationDate(LocalDate expirationDate);
+
     List<Document> findByNameContaining(String name);
+
+    Optional<Document> findByName(String name);
 }

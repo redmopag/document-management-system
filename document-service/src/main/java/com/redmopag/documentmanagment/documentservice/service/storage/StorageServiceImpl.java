@@ -2,7 +2,7 @@ package com.redmopag.documentmanagment.documentservice.service.storage;
 
 import com.redmopag.documentmanagment.common.GenerateLinkResponse;
 import com.redmopag.documentmanagment.documentservice.client.FileStorageClient;
-import com.redmopag.documentmanagment.documentservice.exception.InvalidFileException;
+import com.redmopag.documentmanagment.documentservice.exception.badrequest.InvalidFileException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 

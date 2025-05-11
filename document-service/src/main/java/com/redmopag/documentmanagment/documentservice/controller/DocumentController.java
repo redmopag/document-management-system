@@ -43,4 +43,16 @@ public class DocumentController {
     public List<DocumentSummaryResponse> getDocumentByContaining(@RequestParam("text") String text) {
         return documentService.getDocumentsByContaining(text);
     }
+
+    @DeleteMapping("delete")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteDocument(@RequestParam("id") Long id) {
+        documentService.deleteDocument(id);
+    }
+
+    @PatchMapping("/metadata/update")
+    @ResponseStatus(HttpStatus.OK)
+    public void updateDocumentMetadata(@RequestBody UpdateMetadataRequest request) {
+        documentService.updateDocument(request);
+    }
 }
