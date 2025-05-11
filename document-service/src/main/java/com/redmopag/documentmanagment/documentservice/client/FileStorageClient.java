@@ -1,7 +1,6 @@
 package com.redmopag.documentmanagment.documentservice.client;
 
 import com.redmopag.documentmanagment.common.GenerateLinkResponse;
-import org.elasticsearch.client.RestClientBuilder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.MediaType;
@@ -13,7 +12,7 @@ import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
-import java.io.IOException;
+import java.io.*;
 
 @Component
 public class FileStorageClient {
@@ -31,14 +30,7 @@ public class FileStorageClient {
         this.restClient = restClientBuilder.baseUrl(storageFileBaseUrl).build();
     }
 
-    public Mono<Void> sendFile(Long fileId, MultipartFile file) throws IOException {
-        ByteArrayResource fileAsResource = new ByteArrayResource(file.getBytes()) {
-            @Override
-            public String getFilename() {
-                return file.getOriginalFilename();
-            }
-        };
-
+    public Mono<Void> sendFile(Long fileId, ByteArrayResource fileAsResource) throws IOException {
         MultiValueMap<String, Object> formData = new LinkedMultiValueMap<>();
         formData.add("file-id", fileId.toString());
         formData.add("file", fileAsResource);

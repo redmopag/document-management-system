@@ -10,4 +10,6 @@ public interface DocumentMapper {
     DocumentMapper INSTANCE = Mappers.getMapper(DocumentMapper.class);
 
     DocumentSummaryResponse toDocumentSummaryResponse(Document document);
+
+    DocumentDetailsResponse toDocumentDetailsResponse(Document document);
 }

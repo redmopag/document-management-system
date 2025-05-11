@@ -7,7 +7,6 @@ import com.redmopag.documentmanagment.documentservice.exception.notFound.Documen
 import com.redmopag.documentmanagment.documentservice.kafka.producer.DeleteProducer;
 import com.redmopag.documentmanagment.documentservice.model.*;
 import com.redmopag.documentmanagment.documentservice.repository.DocumentRepository;
-import com.redmopag.documentmanagment.documentservice.service.FileType;
 import com.redmopag.documentmanagment.documentservice.service.storage.StorageService;
 import com.redmopag.documentmanagment.documentservice.service.text.TextService;
 import com.redmopag.documentmanagment.documentservice.utils.DocumentMapper;
@@ -15,9 +14,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
+import java.io.IOException;
 import java.time.*;
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
 @Service
@@ -29,29 +31,49 @@ public class DocumentServiceImpl implements DocumentService {
     private final TextService textService;
 
     @Override
-    public DocumentSummaryResponse uploadDocument(MultipartFile file) {
-        validateMimeType(file);
-        var foundDoc = documentRepository.findByName(file.getOriginalFilename());
+    public DocumentSummaryResponse uploadDocument(List <MultipartFile> files,
+                                                  String category,
+                                                  LocalDate expirationDate) {
+        validateFiles(files);
+        var foundDoc = documentRepository.findByName(files.get(0).getOriginalFilename());
         if (foundDoc.isPresent()) {
             return DocumentMapper.INSTANCE.toDocumentSummaryResponse(foundDoc.get());
         }
-        var savedDocument = documentRepository.save(buildDocument(file));
-        storageService.upload(savedDocument.getId(), file);
+        var savedDocument = documentRepository.save(
+                buildDocument(files.get(0).getOriginalFilename(), category, expirationDate));
+        storageService.upload(savedDocument.getId(), files);
         System.out.println("Сохранён документ: " + savedDocument.getName() + " - " + savedDocument.getId());
         return DocumentMapper.INSTANCE.toDocumentSummaryResponse(savedDocument);
     }
 
-    private void validateMimeType(MultipartFile file) {
-        if(!FileType.isValidMimeType(file.getContentType())) {
-            throw new DocumentParamsException("Неверный тип документа: " +
-                    file.getOriginalFilename());
+    private void validateFiles(List<MultipartFile> files) {
+        if (files == null || files.isEmpty()) {
+            throw new InvalidFileException("Необходимо загрузить хотя бы один файл.");
+        }
+        boolean allImages = isAllImages(files);
+        boolean isSinglePdf = isSinglePdf(files);
+        if (!allImages && !isSinglePdf) {
+            throw new InvalidFileException("Разрешается загрузка либо одного PDF-файла, либо нескольких изображений.");
         }
     }
 
-    private Document buildDocument(MultipartFile file) {
+    private static boolean isAllImages(List<MultipartFile> files) {
+        return files.stream().allMatch(f ->
+                f.getContentType() != null && f.getContentType().startsWith("image/"));
+    }
+
+    private static boolean isSinglePdf(List<MultipartFile> files) {
+        return files.size() == 1 &&
+                files.get(0).getContentType() != null &&
+                files.get(0).getContentType().equals("application/pdf");
+    }
+
+    private Document buildDocument(String name, String category, LocalDate expirationDate) {
         return Document.builder()
-                .name(file.getOriginalFilename())
+                .name(name)
                 .status(DocumentStatus.PROCESSING)
+                .category(category)
+                .expirationDate(expirationDate)
                 .build();
     }
 
@@ -70,6 +92,9 @@ public class DocumentServiceImpl implements DocumentService {
     @Override
     public DocumentDetailsResponse getDocumentDetails(Long id) {
         Document doc = getDocumentById(id);
+        if (!doc.getStatus().equals(DocumentStatus.CONFIRMED)) {
+            throw new NotAllowedFileStatusException("Документ " + doc.getName() + " ещё не обработан");
+        }
         TextResponse docText = textService.getTextById(doc.getTextId());
         String originalDocUrl = storageService.getDownloadUrl(doc.getObjectKey());
         return buildDocumentDetailsResponse(doc, originalDocUrl, docText.getHocrContent());
@@ -77,14 +102,10 @@ public class DocumentServiceImpl implements DocumentService {
 
     private DocumentDetailsResponse buildDocumentDetailsResponse(
             Document doc, String originalDocUrl, String hocrContent) {
-        return DocumentDetailsResponse.builder()
-                .id(doc.getId())
-                .name(doc.getName())
-                .createdAt(doc.getUploadedAt())
-                .lastModified(doc.getUpdatedAt())
-                .downloadUrl(originalDocUrl)
-                .hocrText(hocrContent)
-                .build();
+        var details = DocumentMapper.INSTANCE.toDocumentDetailsResponse(doc);
+        details.setHocrText(hocrContent);
+        details.setDownloadUrl(originalDocUrl);
+        return details;
     }
 
     @Override
@@ -107,6 +128,7 @@ public class DocumentServiceImpl implements DocumentService {
         documentRepository.save(document);
         System.out.println("Метаданные документа " + document.getName() +
                 " - " + document.getId() + " обновлены");
+        notifyStatusChange(document.getId(), document.getStatus());
     }
 
     private Document updateDocument(MetadataEvent event) {
@@ -137,6 +159,7 @@ public class DocumentServiceImpl implements DocumentService {
         } catch (DocumentNotFoundException ignored){}
     }
 
+    @Transactional
     @Override
     public void updateDocument(UpdateMetadataRequest request) {
         var doc = getDocumentById(request.getId());
@@ -148,6 +171,31 @@ public class DocumentServiceImpl implements DocumentService {
         }
         if (request.getExpirationDate() != null) {
             doc.setExpirationDate(request.getExpirationDate());
+        }
+        documentRepository.save(doc);
+    }
+
+    private final List<SseEmitter> emitters = new CopyOnWriteArrayList<>();
+
+    @Override
+    public SseEmitter registerEmitter() {
+        SseEmitter emitter = new SseEmitter((long) Integer.MAX_VALUE);
+        emitter.onTimeout(() -> emitters.remove(emitter));
+        emitter.onCompletion(() -> emitters.remove(emitter));
+        emitters.add(emitter);
+        return emitter;
+    }
+
+    private void notifyStatusChange(Long documentId, DocumentStatus status) {
+        StatusChanged statusChanged = new StatusChanged(documentId, status);
+        for (var emitter : emitters) {
+            try {
+                emitter.send(SseEmitter.event()
+                        .name("status-update")
+                        .data(statusChanged));
+            } catch (IOException e) {
+                emitters.remove(emitter);
+            }
         }
     }
 }

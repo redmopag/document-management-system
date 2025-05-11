@@ -4,13 +4,15 @@ import com.redmopag.documentmanagment.common.MetadataEvent;
 import com.redmopag.documentmanagment.documentservice.dto.document.*;
 import com.redmopag.documentmanagment.documentservice.model.Document;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
 
 public interface DocumentService {
-    DocumentSummaryResponse uploadDocument(MultipartFile file) throws IOException;
+    DocumentSummaryResponse uploadDocument(List <MultipartFile> files, String category, LocalDate expirationDate)
+            throws IOException;
 
     List<Document> findExpiringAt(LocalDate expirationDate);
 
@@ -25,4 +27,6 @@ public interface DocumentService {
     void deleteDocument(Long id);
 
     void updateDocument(UpdateMetadataRequest request);
+
+    SseEmitter registerEmitter();
 }
