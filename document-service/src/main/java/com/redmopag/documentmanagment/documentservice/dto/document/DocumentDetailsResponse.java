@@ -12,6 +12,7 @@ public class DocumentDetailsResponse {
     private Long id;
     private String name;
     private String category;
+    private String userName;
     private LocalDate expirationDate;
     private LocalDateTime uploadedAt;
     private LocalDateTime updatedAt;

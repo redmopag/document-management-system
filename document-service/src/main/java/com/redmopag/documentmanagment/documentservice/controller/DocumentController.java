@@ -28,9 +28,10 @@ public class DocumentController {
             @RequestParam("files") List<MultipartFile> files,
             @RequestParam(value = "category", required = false) String category,
             @RequestParam(value = "expirationDate", required = false)
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate expirationDate)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate expirationDate,
+            @RequestParam("user-name") String userName)
             throws IOException {
-        return documentService.uploadDocument(files, category, expirationDate);
+        return documentService.uploadDocument(files, category, expirationDate, userName);
     }
 
     @GetMapping("/all")
@@ -47,8 +48,10 @@ public class DocumentController {
 
     @GetMapping("/search")
     @ResponseStatus(HttpStatus.OK)
-    public List<DocumentSummaryResponse> searchDocument(@RequestParam("text") String text) {
-        return documentService.getDocumentsByContaining(text);
+    public List<DocumentSummaryResponse> searchDocument(
+            @RequestParam("username") String userName,
+            @RequestParam("text") String text) {
+        return documentService.getDocumentsByContaining(userName, text);
     }
 
     @DeleteMapping("delete")

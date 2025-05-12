@@ -40,6 +40,9 @@ public class Document {
     @Column(nullable = false)
     private LocalDateTime updatedAt;
 
+    @Column(nullable = false)
+    private String userName;
+
     @PrePersist
     public void onCreate() {
         this.uploadedAt = LocalDateTime.now();

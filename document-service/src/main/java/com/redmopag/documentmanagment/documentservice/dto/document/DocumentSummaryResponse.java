@@ -13,4 +13,5 @@ public class DocumentSummaryResponse {
     private String name;
     private LocalDateTime updatedAt;
     private DocumentStatus status;
+    private String userName;
 }

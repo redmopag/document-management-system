@@ -33,14 +33,15 @@ public class DocumentServiceImpl implements DocumentService {
     @Override
     public DocumentSummaryResponse uploadDocument(List <MultipartFile> files,
                                                   String category,
-                                                  LocalDate expirationDate) {
+                                                  LocalDate expirationDate,
+                                                  String userName) {
         validateFiles(files);
         var foundDoc = documentRepository.findByName(files.get(0).getOriginalFilename());
         if (foundDoc.isPresent()) {
             return DocumentMapper.INSTANCE.toDocumentSummaryResponse(foundDoc.get());
         }
         var savedDocument = documentRepository.save(
-                buildDocument(files.get(0).getOriginalFilename(), category, expirationDate));
+                buildDocument(files.get(0).getOriginalFilename(), category, expirationDate, userName));
         storageService.upload(savedDocument.getId(), files);
         System.out.println("Сохранён документ: " + savedDocument.getName() + " - " + savedDocument.getId());
         return DocumentMapper.INSTANCE.toDocumentSummaryResponse(savedDocument);
@@ -68,12 +69,14 @@ public class DocumentServiceImpl implements DocumentService {
                 files.get(0).getContentType().equals("application/pdf");
     }
 
-    private Document buildDocument(String name, String category, LocalDate expirationDate) {
+    private Document buildDocument(String name, String category,
+                                   LocalDate expirationDate, String userName) {
         return Document.builder()
                 .name(name)
                 .status(DocumentStatus.PROCESSING)
                 .category(category)
                 .expirationDate(expirationDate)
+                .userName(userName)
                 .build();
     }
 
@@ -109,7 +112,7 @@ public class DocumentServiceImpl implements DocumentService {
     }
 
     @Override
-    public List<DocumentSummaryResponse> getDocumentsByContaining(String text) {
+    public List<DocumentSummaryResponse> getDocumentsByContaining(String username, String text) {
         List<TextResponse> docText = textService.getTextByContaining(text);
         if (docText.isEmpty()) {
             return Collections.emptyList();
@@ -117,6 +120,7 @@ public class DocumentServiceImpl implements DocumentService {
         Iterable<Long> ids = docText.stream().map(TextResponse::getDocumentId).collect(Collectors.toList());
         return documentRepository.findAllById(ids)
                 .stream()
+                .filter(doc -> doc.getName().equals(username))
                 .map(DocumentMapper.INSTANCE::toDocumentSummaryResponse)
                 .collect(Collectors.toList());
     }

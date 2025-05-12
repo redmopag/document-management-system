@@ -11,7 +11,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 public interface DocumentService {
-    DocumentSummaryResponse uploadDocument(List <MultipartFile> files, String category, LocalDate expirationDate)
+    DocumentSummaryResponse uploadDocument(List <MultipartFile> files, String category, LocalDate expirationDate, String userName)
             throws IOException;
 
     List<Document> findExpiringAt(LocalDate expirationDate);
@@ -20,7 +20,7 @@ public interface DocumentService {
 
     DocumentDetailsResponse getDocumentDetails(Long id);
 
-    List<DocumentSummaryResponse> getDocumentsByContaining(String text);
+    List<DocumentSummaryResponse> getDocumentsByContaining(String username, String text);
 
     void updateDocumentMetadata(MetadataEvent event);
 
