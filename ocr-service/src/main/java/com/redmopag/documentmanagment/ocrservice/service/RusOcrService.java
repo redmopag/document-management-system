@@ -1,7 +1,6 @@
 package com.redmopag.documentmanagment.ocrservice.service;
 
 import com.redmopag.documentmanagment.common.*;
-import com.redmopag.documentmanagment.ocrservice.client.FileDownloader;
 import com.redmopag.documentmanagment.ocrservice.exception.OcrFailedException;
 import net.sourceforge.tess4j.*;
 import org.jsoup.Jsoup;
@@ -12,18 +11,17 @@ import java.io.File;
 @Service
 public class RusOcrService implements OcrService{
     private final ITesseract tesseract;
-    private final FileDownloader fileDownloader;
+    private final PreprocessServiceImpl preprocessServiceImpl;
 
-    public RusOcrService(ITesseract tesseract, FileDownloader fileDownloader) {
+    public RusOcrService(ITesseract tesseract,
+                         PreprocessServiceImpl preprocessServiceImpl) {
         this.tesseract = tesseract;
-        this.fileDownloader = fileDownloader;
+        this.preprocessServiceImpl = preprocessServiceImpl;
     }
 
     @Override
     public ProcessTextEvent recognize(OcrFileEvent event) {
-        System.out.println("Скачивание файла по url: " + event.getDownloadUrl());
-        File tempFile = fileDownloader.downloadFile(event.getDownloadUrl(), event.getFilePostfix());
-        System.out.println("Скачан файл: " + tempFile.getName());
+        var tempFile = preprocessServiceImpl.preprocess(event.getDownloadUrl(), event.getFilePostfix());
         String hocrContent = recognizeText(tempFile);
         String plainText = Jsoup.parse(hocrContent).text();
         System.out.println("Документ " + event.getFileId() + " распознан");
