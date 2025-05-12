@@ -1,13 +1,12 @@
 package com.redmopag.documentmanagment.ocrservice.service;
 
-import com.redmopag.documentmanagment.ocrservice.client.FileDownloader;
-import com.redmopag.documentmanagment.ocrservice.exception.OcrFailedException;
+import com.redmopag.documentmanagment.ocrservice.utils.FileConverter;
 import org.opencv.core.*;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 import org.springframework.stereotype.Service;
 
-import java.io.*;
+import java.io.File;
 import java.util.*;
 
 @Service
@@ -16,32 +15,22 @@ public class PreprocessServiceImpl {
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
     }
 
-    private final FileDownloader fileDownloader;
-
-    public PreprocessServiceImpl(FileDownloader fileDownloader) {
-        this.fileDownloader = fileDownloader;
-    }
-
-    public File preprocess(String downloadUrl, String filePostfix) {
-        var file = downloadFile(downloadUrl, filePostfix);
+    public File preprocess(File file) {
         Mat preprocessImage = preprocessImage(file);
-        return convertToFile(preprocessImage, downloadUrl);
-    }
-
-    private File downloadFile(String downloadUrl, String filePostfix) {
-        System.out.println("Скачивание файла по url: " + downloadUrl);
-        File tempFile = fileDownloader.downloadFile(downloadUrl, filePostfix);
-        System.out.println("Скачан файл: " + tempFile.getName());
-        return tempFile;
+        return FileConverter.convertToFile(preprocessImage);
     }
 
     private Mat preprocessImage(File file) {
         Mat image = Imgcodecs.imread(file.getAbsolutePath());
-        increaseContrast(image);
         var gray = convertToGray(image);
-        var diff = deleteBackground(gray);
-        var norm = normalizeContrast(diff);
-        return binarize(norm);
+        var blurred = blur(gray);
+        return binarize(blurred);
+    }
+
+    private Mat blur(Mat gray) {
+        Mat blurred = new Mat();
+        Imgproc.GaussianBlur(gray, blurred, new Size(3, 3), 0);
+        return blurred;
     }
 
     private void increaseContrast(Mat image) {
@@ -88,20 +77,10 @@ public class PreprocessServiceImpl {
         return norm;
     }
 
-    private Mat binarize(Mat norm) {
+    private Mat binarize(Mat prev) {
         Mat thresh = new Mat();
-        Imgproc.adaptiveThreshold(norm, thresh, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C,
+        Imgproc.adaptiveThreshold(prev, thresh, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C,
                 Imgproc.THRESH_BINARY, 15, 10);
         return thresh;
-    }
-
-    private File convertToFile(Mat preprocessImage, String downloadUrl) {
-        try {
-            File tempFile = File.createTempFile("preprocessed", ".png");
-            Imgcodecs.imwrite(tempFile.getAbsolutePath(), preprocessImage);
-            return tempFile;
-        } catch (IOException e) {
-            throw new OcrFailedException("Не удалось предобработать файл. Url: " + downloadUrl);
-        }
     }
 }
