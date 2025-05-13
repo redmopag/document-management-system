@@ -126,7 +126,6 @@ async function loadDetails(id) {
         <p><strong>Дата загрузки:</strong> ${d.uploadedAt}</p>
         <p><strong>Дата обновления:</strong> ${d.updatedAt}</p>
         <p><strong>Дата истечения:</strong> ${d.expirationDate || '-'}</p>
-        <p><a href="${d.downloadUrl}" target="_blank">Скачать оригинал</a></p>
 
         <div class="tab-container">
             <div class="tabs">
@@ -136,8 +135,9 @@ async function loadDetails(id) {
             <div id="tab-original" class="tab-content">
                 <object class="pdf" 
                     data="${d.downloadUrl}" 
-                    width="800"
-                    height="500"></object>
+                    style="width: 100%; 
+                    height: 500px; 
+                    border: 0px"></object>
             </div>
             <div id="tab-text" class="tab-content hidden">
                 <iframe style="width: 100%; height: 500px; border: 1px solid #ccc; margin-top: 10px;"

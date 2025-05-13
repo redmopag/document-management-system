@@ -51,7 +51,7 @@ public class DocumentController {
     public List<DocumentSummaryResponse> searchDocument(
             @RequestParam("username") String userName,
             @RequestParam("text") String text) {
-        return documentService.getDocumentsByContaining(userName, text);
+        return documentService.findDocumentByText(userName, text);
     }
 
     @DeleteMapping("delete")

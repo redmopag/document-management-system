@@ -20,7 +20,7 @@ public interface DocumentService {
 
     DocumentDetailsResponse getDocumentDetails(Long id);
 
-    List<DocumentSummaryResponse> getDocumentsByContaining(String username, String text);
+    List<DocumentSummaryResponse> findDocumentByText(String username, String text);
 
     void updateDocumentMetadata(MetadataEvent event);
 

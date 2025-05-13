@@ -16,7 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
-import java.io.IOException;
 import java.time.*;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -115,17 +114,36 @@ public class DocumentServiceImpl implements DocumentService {
     }
 
     @Override
-    public List<DocumentSummaryResponse> getDocumentsByContaining(String username, String text) {
+    public List<DocumentSummaryResponse> findDocumentByText(String username, String text) {
+        var docs = documentRepository.findAllByNameContainingAndUserName(text, username);
+        var textContainingDocs = findDocumentsByTextAndUserName(text, username);
+        docs.addAll(textContainingDocs);
+        return docs.stream()
+                .map(DocumentMapper.INSTANCE::toDocumentSummaryResponse)
+                .collect(Collectors.toList());
+    }
+
+    private Collection<Document> findDocumentsByTextAndUserName(String text, String userName) {
+        List<TextResponse> docText = foundText(text);
+        return getFilteredByUsernameDocuments(userName, docText);
+    }
+
+    private List<TextResponse> foundText(String text) {
         List<TextResponse> docText = textService.getTextByContaining(text);
         if (docText.isEmpty()) {
             return Collections.emptyList();
         }
-        Iterable<Long> ids = docText.stream().map(TextResponse::getDocumentId).collect(Collectors.toList());
+        return docText;
+    }
+
+    private List<Document> getFilteredByUsernameDocuments(String userName, List<TextResponse> docText) {
+        Iterable<Long> ids = docText.stream()
+                .map(TextResponse::getDocumentId)
+                .collect(Collectors.toList());
         return documentRepository.findAllById(ids)
                 .stream()
-                .filter(doc -> doc.getUserName().equals(username))
-                .map(DocumentMapper.INSTANCE::toDocumentSummaryResponse)
-                .collect(Collectors.toList());
+                .filter(doc -> doc.getUserName().equals(userName))
+                .toList();
     }
 
     @Transactional
@@ -200,7 +218,7 @@ public class DocumentServiceImpl implements DocumentService {
                 emitter.send(SseEmitter.event()
                         .name("status-update")
                         .data(statusChanged));
-            } catch (IOException e) {
+            } catch (Exception e) {
                 emitters.remove(emitter);
             }
         }

@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 import java.io.File;
 import java.util.*;
 
-@Service
 public class PreprocessServiceImpl {
     static {
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);

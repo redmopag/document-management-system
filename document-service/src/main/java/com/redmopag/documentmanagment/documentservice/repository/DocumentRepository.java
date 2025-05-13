@@ -14,4 +14,6 @@ public interface DocumentRepository extends JpaRepository<Document, Long> {
     List<Document> findByNameContaining(String name);
 
     Optional<Document> findByName(String name);
+
+    List<Document> findAllByNameContainingAndUserName(String text, String userName);
 }

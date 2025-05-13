@@ -76,13 +76,6 @@ public class StorageServiceImpl implements StorageService {
         return document;
     }
 
-    private ByteArrayOutputStream saveToOutputStream(PDDocument document) throws IOException {
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        document.save(outputStream);
-        document.close();
-        return outputStream;
-    }
-
     private PDPage addPageToDocument(BufferedImage bufferedImage, PDDocument document) {
         PDPage page = new PDPage(new PDRectangle(bufferedImage.getWidth(), bufferedImage.getHeight()));
         document.addPage(page);
@@ -94,6 +87,13 @@ public class StorageServiceImpl implements StorageService {
         PDImageXObject pdImage = LosslessFactory.createFromImage(document, bufferedImage);
         contentStream.drawImage(pdImage, 0, 0);
         contentStream.close();
+    }
+
+    private ByteArrayOutputStream saveToOutputStream(PDDocument document) throws IOException {
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        document.save(outputStream);
+        document.close();
+        return outputStream;
     }
 
     @Override

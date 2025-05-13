@@ -28,9 +28,9 @@ public class DocumentStorageClient {
         return documentKey;
     }
 
-    public String generatePresignedUrl(String documentKey, int expirationMinutes) {
-        GetObjectRequest getObjectRequest = s3Director.buildGetRequest(bucket, documentKey);
-        GetObjectPresignRequest presignRequest = s3Director.buildPresignReqeust(expirationMinutes, getObjectRequest);
+    public String generatePresignedUrl(String documentKey, int expirationMinutes, String fileName) {
+        GetObjectRequest getObjectRequest = s3Director.buildGetRequest(bucket, documentKey, fileName);
+        GetObjectPresignRequest presignRequest = s3Director.buildObjectPresignReqeust(expirationMinutes, getObjectRequest);
         PresignedGetObjectRequest presignedRequest = s3Presigner.presignGetObject(presignRequest);
         System.out.println("Presigned URL: " + presignedRequest.url().toString());
         return presignedRequest.url().toExternalForm();

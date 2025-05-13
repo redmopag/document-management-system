@@ -28,7 +28,7 @@ public class StorageServiceImpl implements StorageService {
             var filePostfix = file.getOriginalFilename().split("\\.")[1];
             ocrKafkaProducer.ocrFile(fileId,
                     objectKey,
-                    documentStorageClient.generatePresignedUrl(objectKey, EXPIRATION_MINUTES),
+                    generatePresignedUrl(objectKey, EXPIRATION_MINUTES),
                     filePostfix);
             System.out.println("Документ " + fileId + " помещён в хранилище. Ключ: " + objectKey);
         } catch (IOException e) {
@@ -44,8 +44,21 @@ public class StorageServiceImpl implements StorageService {
 
     @Override
     public GenerateLinkResponse generateLink(String objectKey) {
-        var url = documentStorageClient.generatePresignedUrl(objectKey, EXPIRATION_MINUTES);
+        var url = generatePresignedUrl(objectKey, EXPIRATION_MINUTES);
         return new GenerateLinkResponse(url);
+    }
+
+    public String generatePresignedUrl(String objectKey, int expirationMinutes) {
+        var fileName = extractFileName(objectKey);
+        return documentStorageClient.generatePresignedUrl(objectKey, expirationMinutes, fileName);
+    }
+
+    private String extractFileName(String objectKey) {
+        int firstDash = objectKey.indexOf("-");
+        if (firstDash >= 0 && firstDash < objectKey.length() - 1) {
+            return objectKey.substring(firstDash + 1);
+        }
+        return objectKey;
     }
 
     @Override
