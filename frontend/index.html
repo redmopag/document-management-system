@@ -9,6 +9,7 @@
     <nav>
         <button onclick="loadAllDocuments()">📄 Все документы</button>
         <button onclick="showSection('upload')">📤 Загрузить</button>
+        <input type="text" id="searchUsername" placeholder="Имя пользователя">
         <input type="text" id="searchInput" placeholder="Поиск...">
         <button onclick="searchDocuments()">🔍 Найти</button>
     </nav>
@@ -37,6 +38,7 @@
                 <br>
                 <label>Категория: <input type="text" name="category"></label><br>
                 <label>Дата истечения: <input type="date" name="expirationDate"></label><br>
+                <label>Имя пользователя: <input type="text" name="username" id="uploadUsername" required></label><br>
                 <button type="submit">Загрузить</button>
             </form>
             <div id="uploadResult"></div>

@@ -29,7 +29,7 @@ public class DocumentController {
             @RequestParam(value = "category", required = false) String category,
             @RequestParam(value = "expirationDate", required = false)
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate expirationDate,
-            @RequestParam("user-name") String userName)
+            @RequestParam("username") String userName)
             throws IOException {
         return documentService.uploadDocument(files, category, expirationDate, userName);
     }

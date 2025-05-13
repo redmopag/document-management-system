@@ -49,7 +49,7 @@ public class StorageServiceImpl implements StorageService {
     }
 
     private boolean isImage(List<MultipartFile> files) {
-        return files.get(0).getOriginalFilename().startsWith("image");
+        return files.get(0).getContentType().startsWith("image");
     }
 
     private ByteArrayResource convertToByteArrayResource(byte[] byteOutputStream, String fileName) {

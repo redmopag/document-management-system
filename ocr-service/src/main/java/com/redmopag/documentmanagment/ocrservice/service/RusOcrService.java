@@ -14,14 +14,12 @@ import java.io.File;
 @RequiredArgsConstructor
 public class RusOcrService implements OcrService{
     private final ITesseract tesseract;
-    private final PreprocessServiceImpl preprocessServiceImpl;
     private final FileDownloader fileDownloader;
 
     @Override
     public ProcessTextEvent recognize(OcrFileEvent event) {
         var downloadFile = downloadFile(event.getDownloadUrl(), event.getFilePostfix());
-        var preprocessedFile = preprocessServiceImpl.preprocess(downloadFile);
-        String hocrContent = recognizeText(preprocessedFile);
+        String hocrContent = recognizeText(downloadFile);
         String plainText = Jsoup.parse(hocrContent).text();
         System.out.println("Документ " + event.getFileId() + " распознан");
         return ProcessTextEvent.builder()

@@ -40,8 +40,11 @@ public class DocumentServiceImpl implements DocumentService {
         if (foundDoc.isPresent()) {
             return DocumentMapper.INSTANCE.toDocumentSummaryResponse(foundDoc.get());
         }
-        var savedDocument = documentRepository.save(
-                buildDocument(files.get(0).getOriginalFilename(), category, expirationDate, userName));
+        var savedDocument = documentRepository.save(buildDocument(
+                files.get(0).getOriginalFilename(),
+                category,
+                expirationDate,
+                userName));
         storageService.upload(savedDocument.getId(), files);
         System.out.println("Сохранён документ: " + savedDocument.getName() + " - " + savedDocument.getId());
         return DocumentMapper.INSTANCE.toDocumentSummaryResponse(savedDocument);
@@ -58,12 +61,12 @@ public class DocumentServiceImpl implements DocumentService {
         }
     }
 
-    private static boolean isAllImages(List<MultipartFile> files) {
+    private boolean isAllImages(List<MultipartFile> files) {
         return files.stream().allMatch(f ->
                 f.getContentType() != null && f.getContentType().startsWith("image/"));
     }
 
-    private static boolean isSinglePdf(List<MultipartFile> files) {
+    private boolean isSinglePdf(List<MultipartFile> files) {
         return files.size() == 1 &&
                 files.get(0).getContentType() != null &&
                 files.get(0).getContentType().equals("application/pdf");

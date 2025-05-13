@@ -55,6 +55,10 @@ document.getElementById('uploadForm').addEventListener('submit', async function 
         }
     }
 
+    const username = document.getElementById('uploadUsername').value;
+    data.append('username', username);
+
+
     const res = await fetch(`${api}/upload`, {
         method: 'POST',
         body: data
@@ -100,8 +104,9 @@ async function loadAllDocuments() {
 // Поиск
 async function searchDocuments() {
     const text = document.getElementById('searchInput').value;
+    const username = document.getElementById('searchUsername').value;
     if (!text) return;
-    const res = await fetch(`${api}/search?text=${encodeURIComponent(text)}`);
+    const res = await fetch(`${api}/search?text=${encodeURIComponent(text)}&username=${encodeURIComponent(username)}`);
     const docs = await res.json();
     const container = document.getElementById('searchResults');
     container.innerHTML = docs.map(d =>
@@ -114,6 +119,13 @@ async function searchDocuments() {
 async function loadDetails(id) {
     const res = await fetch(`${api}/details?id=${id}`);
     const d = await res.json();
+
+    // Определим тип по расширению (можно и по MIME, если backend даёт)
+    const isPdf = d.downloadUrl.toLowerCase().endsWith('.pdf');
+
+    const originalContent = isPdf
+        ? `<iframe src="${d.downloadUrl}" style="width: 100%; height: 500px; border: 1px solid #ccc;"></iframe>`
+        : `<img src="${d.downloadUrl}" alt="Оригинал документа" style="max-width: 100%; border: 1px solid #ccc; margin-top: 10px;">`;
 
     const html = `
         <p><strong>Название:</strong> ${d.name}</p>
@@ -129,12 +141,11 @@ async function loadDetails(id) {
                 <button onclick="switchTab('text')">🔍 Распознанный текст</button>
             </div>
             <div id="tab-original" class="tab-content">
-                <img src="${d.downloadUrl}" alt="Оригинал документа" style="max-width: 100%; border: 1px solid #ccc; margin-top: 10px;">
+                ${originalContent}
             </div>
             <div id="tab-text" class="tab-content hidden">
                 <iframe style="width: 100%; height: 500px; border: 1px solid #ccc; margin-top: 10px;"
-                        srcdoc='${d.hocrText.replace(/'/g, "&apos;").replace(/"/g, "&quot;")}'>
-                </iframe>
+                        srcdoc='${d.hocrText.replace(/'/g, "&apos;").replace(/"/g, "&quot;")}'></iframe>
             </div>
         </div>
     `;
@@ -142,7 +153,6 @@ async function loadDetails(id) {
     document.getElementById('documentDetails').innerHTML = html;
     showSection('details');
 }
-
 
 // Удаление
 async function deleteDocument(id) {
