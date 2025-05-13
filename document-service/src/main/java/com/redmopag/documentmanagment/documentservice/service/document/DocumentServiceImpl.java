@@ -123,7 +123,7 @@ public class DocumentServiceImpl implements DocumentService {
         Iterable<Long> ids = docText.stream().map(TextResponse::getDocumentId).collect(Collectors.toList());
         return documentRepository.findAllById(ids)
                 .stream()
-                .filter(doc -> doc.getName().equals(username))
+                .filter(doc -> doc.getUserName().equals(username))
                 .map(DocumentMapper.INSTANCE::toDocumentSummaryResponse)
                 .collect(Collectors.toList());
     }

@@ -56,8 +56,7 @@ document.getElementById('uploadForm').addEventListener('submit', async function 
     }
 
     const username = document.getElementById('uploadUsername').value;
-    data.append('username', username);
-
+    data.set('username', username);
 
     const res = await fetch(`${api}/upload`, {
         method: 'POST',
@@ -87,6 +86,7 @@ async function loadAllDocuments() {
         tr.setAttribute('data-id', d.id); // Добавляем data-id для идентификации строки
         tr.innerHTML = `
             <td>${d.id}</td>
+            <td>${d.userName}</td>
             <td>${d.name}</td>
             <td class="status-cell">${d.status}</td> <!-- Добавляем класс для ячейки статуса -->
             <td>${new Date(d.updatedAt).toLocaleString()}</td>
@@ -120,13 +120,6 @@ async function loadDetails(id) {
     const res = await fetch(`${api}/details?id=${id}`);
     const d = await res.json();
 
-    // Определим тип по расширению (можно и по MIME, если backend даёт)
-    const isPdf = d.downloadUrl.toLowerCase().endsWith('.pdf');
-
-    const originalContent = isPdf
-        ? `<iframe src="${d.downloadUrl}" style="width: 100%; height: 500px; border: 1px solid #ccc;"></iframe>`
-        : `<img src="${d.downloadUrl}" alt="Оригинал документа" style="max-width: 100%; border: 1px solid #ccc; margin-top: 10px;">`;
-
     const html = `
         <p><strong>Название:</strong> ${d.name}</p>
         <p><strong>Категория:</strong> ${d.category}</p>
@@ -141,7 +134,10 @@ async function loadDetails(id) {
                 <button onclick="switchTab('text')">🔍 Распознанный текст</button>
             </div>
             <div id="tab-original" class="tab-content">
-                ${originalContent}
+                <object class="pdf" 
+                    data="${d.downloadUrl}" 
+                    width="800"
+                    height="500"></object>
             </div>
             <div id="tab-text" class="tab-content hidden">
                 <iframe style="width: 100%; height: 500px; border: 1px solid #ccc; margin-top: 10px;"
