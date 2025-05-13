@@ -32,36 +32,6 @@ function switchTab(tabName) {
     document.getElementById(`tab-${tabName}`).classList.remove('hidden');
 }
 
-function applyHocrStyles(container) {
-    // Стили для корректного отображения
-    const style = document.createElement('style');
-    style.textContent = `
-        .hocr-viewer {
-            position: relative;
-            width: 100%;
-            overflow: auto;
-            background: #f0f0f0;
-        }
-        .ocr_page {
-            position: relative;
-            margin: 0 auto;
-            background-size: contain;
-            background-repeat: no-repeat;
-        }
-        .ocr_line, .ocrx_word {
-            position: absolute;
-            color: transparent;
-            border: 1px solid rgba(0,0,0,0.1);
-            font-size: 0; /* убираем текст */
-        }
-        .ocr_line:hover, .ocrx_word:hover {
-            border: 1px solid red;
-        }
-    `;
-    document.head.appendChild(style);
-}
-
-
 // Переключение между изображениями и PDF
 document.getElementById('docType').addEventListener('change', function () {
     const type = this.value;
@@ -170,15 +140,13 @@ async function loadDetails(id) {
                     border: 0px"></object>
             </div>
             <div id="tab-text" class="tab-content hidden">
-                <div id="hocrContainer" class="hocr-viewer"></div>
+                <iframe style="width: 100%; height: 500px; border: 1px solid #ccc; margin-top: 10px;"
+                        srcdoc='${d.hocrText.replace(/'/g, "&apos;").replace(/"/g, "&quot;")}'></iframe>
             </div>
         </div>
     `;
 
     document.getElementById('documentDetails').innerHTML = html;
-    const hocrContainer = document.getElementById('hocrContainer');
-    hocrContainer.innerHTML = d.hocrText;
-    applyHocrStyles(hocrContainer);
     showSection('details');
 }
 

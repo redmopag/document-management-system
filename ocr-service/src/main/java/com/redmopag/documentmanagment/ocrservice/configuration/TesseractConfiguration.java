@@ -10,7 +10,7 @@ public class TesseractConfiguration {
         Tesseract tesseract = new Tesseract();
         tesseract.setDatapath("tesseract/");
         tesseract.setLanguage("rus");
-        tesseract.setPageSegMode(3);
+        tesseract.setPageSegMode(1);
         tesseract.setOcrEngineMode(1);
         tesseract.setVariable("tessedit_create_hocr", "1");
         tesseract.setVariable("preserve_interword_spaces", "1");
