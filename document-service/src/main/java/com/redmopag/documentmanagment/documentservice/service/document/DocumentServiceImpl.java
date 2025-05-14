@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
+import java.io.IOException;
 import java.time.*;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -102,13 +103,13 @@ public class DocumentServiceImpl implements DocumentService {
         }
         TextResponse docText = textService.getTextById(doc.getTextId());
         String originalDocUrl = storageService.getDownloadUrl(doc.getObjectKey());
-        return buildDocumentDetailsResponse(doc, originalDocUrl, docText.getHocrContent());
+        return buildDocumentDetailsResponse(doc, originalDocUrl, docText.getText());
     }
 
     private DocumentDetailsResponse buildDocumentDetailsResponse(
             Document doc, String originalDocUrl, String hocrContent) {
         var details = DocumentMapper.INSTANCE.toDocumentDetailsResponse(doc);
-        details.setHocrText(hocrContent);
+        details.setText(hocrContent);
         details.setDownloadUrl(originalDocUrl);
         return details;
     }
@@ -215,12 +216,17 @@ public class DocumentServiceImpl implements DocumentService {
         StatusChanged statusChanged = new StatusChanged(documentId, status);
         for (var emitter : emitters) {
             try {
-                emitter.send(SseEmitter.event()
-                        .name("status-update")
-                        .data(statusChanged));
+                sendNotification(emitter, "status-update", statusChanged);
             } catch (Exception e) {
                 emitters.remove(emitter);
             }
         }
+    }
+
+    private synchronized void sendNotification(SseEmitter emitter, String eventName,
+                                               StatusChanged statusChanged) throws IOException {
+        emitter.send(SseEmitter.event()
+                .name(eventName)
+                .data(statusChanged));
     }
 }

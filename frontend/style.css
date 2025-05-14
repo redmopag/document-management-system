@@ -100,3 +100,25 @@ th, td {
     padding: 10px;
     background: #fff;
 }
+#hocr-container {
+    position: relative;
+    width: 100%;
+    background: white;
+    overflow: auto;
+    font-size: 0; /* чтобы не было пробелов между inline-block */
+}
+
+.ocr_page {
+    position: relative;
+    display: block;
+    width: 100%;
+    height: auto;
+    background: #fff;
+}
+
+.ocr_line, .ocrx_word {
+    position: absolute;
+    font-size: 14px;
+    color: black;
+    white-space: nowrap;
+}

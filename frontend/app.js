@@ -42,21 +42,31 @@ document.getElementById('docType').addEventListener('change', function () {
 // Загрузка документа
 document.getElementById('uploadForm').addEventListener('submit', async function (e) {
     e.preventDefault();
-    const form = e.target;
-    const data = new FormData(form);
-    const docType = document.getElementById('docType').value;
 
-    // Очистим лишние файлы
+    const data = new FormData();
+
+    const docType = document.getElementById('docType').value;
+    const username = document.getElementById('uploadUsername').value;
+    const category = document.querySelector('input[name="category"]').value;
+    const expirationDate = document.querySelector('input[name="expirationDate"]').value;
+
+    // Добавляем нужные файлы вручную
     if (docType === 'image') {
-        data.delete('files');
         const images = document.getElementById('imageFiles').files;
         for (const img of images) {
             data.append('files', img);
         }
+    } else if (docType === 'pdf') {
+        const pdf = document.querySelector('#pdfInput input[type="file"]').files[0];
+        if (pdf) {
+            data.append('files', pdf);
+        }
     }
 
-    const username = document.getElementById('uploadUsername').value;
-    data.set('username', username);
+    // Остальные поля
+    if (category) data.append('category', category);
+    if (expirationDate) data.append('expirationDate', expirationDate);
+    data.append('username', username);
 
     const res = await fetch(`${api}/upload`, {
         method: 'POST',
@@ -64,13 +74,13 @@ document.getElementById('uploadForm').addEventListener('submit', async function 
     });
 
     if (!res.ok) {
+        const errorText = await res.text();
+        console.error("Ошибка:", errorText);
         alert("Ошибка при загрузке файла.");
         return;
     }
 
-    const result = await res.json();
-    document.getElementById('uploadResult').innerText = `Загружено: ${result.name}`;
-    form.reset();
+    e.target.reset();
     showSection('list');
     loadAllDocuments();
 });
@@ -141,7 +151,7 @@ async function loadDetails(id) {
             </div>
             <div id="tab-text" class="tab-content hidden">
                 <iframe style="width: 100%; height: 500px; border: 1px solid #ccc; margin-top: 10px;"
-                        srcdoc='${d.hocrText.replace(/'/g, "&apos;").replace(/"/g, "&quot;")}'></iframe>
+                        srcdoc='${d.text}'></iframe>
             </div>
         </div>
     `;

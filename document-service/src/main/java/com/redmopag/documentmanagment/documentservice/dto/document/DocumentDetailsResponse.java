@@ -16,6 +16,6 @@ public class DocumentDetailsResponse {
     private LocalDate expirationDate;
     private LocalDateTime uploadedAt;
     private LocalDateTime updatedAt;
-    private String hocrText;
+    private String text;
     private String downloadUrl;
 }
