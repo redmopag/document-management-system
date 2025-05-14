@@ -1,6 +1,6 @@
 package com.redmopag.documentmanagment.documentservice.dto.document.update;
 
-import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.*;
 import lombok.*;
 import org.springframework.lang.Nullable;
 
@@ -13,7 +13,7 @@ public class UpdateMetadataRequest {
     @Min(1)
     private Long id;
 
-    @Nullable
+    @NotBlank
     private String name;
 
     @Nullable

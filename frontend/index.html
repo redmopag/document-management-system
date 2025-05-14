@@ -19,6 +19,7 @@
         <section id="upload" class="section">
             <h2>Загрузка документа</h2>
             <form id="uploadForm">
+                <label>Имя пользователя: <input type="text" name="username" id="uploadUsername"></label><br>
                 <label>
                     Тип документа:
                     <select id="docType" name="docType">
@@ -39,7 +40,6 @@
                 <label>Имя файла: <input type="text" name="filename"></label><br>
                 <label>Категория: <input type="text" name="category"></label><br>
                 <label>Дата истечения: <input type="date" name="expirationDate"></label><br>
-                <label>Имя пользователя: <input type="text" name="username" id="uploadUsername" required></label><br>
                 <button type="submit">Загрузить</button>
             </form>
             <div id="uploadResult"></div>
@@ -74,6 +74,7 @@
                 <label>Дата истечения: <input type="date" name="expirationDate"></label><br>
                 <button type="submit">Сохранить</button>
             </form>
+            <div id="editingResult"></div>
         </section>
 
         <!-- Результаты поиска -->

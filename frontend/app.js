@@ -76,10 +76,33 @@ document.getElementById('uploadForm').addEventListener('submit', async function 
     });
 
     if (!res.ok) {
-        const errorText = await res.text();
-        console.error("Ошибка:", errorText);
-        alert("Ошибка при загрузке файла.");
+        const uploadResult = document.getElementById('uploadResult');
+        uploadResult.innerHTML = ''; 
+        uploadResult.classList.remove('success');
+        uploadResult.classList.add('error');
+
+        try {
+            const errorData = await res.json();
+            if (errorData.errors && Array.isArray(errorData.errors)) {
+                const errorList = document.createElement('ul');
+                for (const errMsg of errorData.errors) {
+                    const li = document.createElement('li');
+                    li.textContent = errMsg;
+                    errorList.appendChild(li);
+                }
+                uploadResult.appendChild(errorList);
+            } else {
+                uploadResult.textContent = "Произошла ошибка при загрузке файла.";
+            }
+        } catch (e) {
+            uploadResult.textContent = "Ошибка при загрузке файла.";
+        }
         return;
+    } else {
+        const uploadResult = document.getElementById('uploadResult');
+        uploadResult.classList.remove('error');
+        uploadResult.classList.add('success');
+        uploadResult.textContent = "Документ успешно загружен!";
     }
 
     e.target.reset();
@@ -134,7 +157,7 @@ async function loadDetails(id) {
 
     const html = `
         <p><strong>Название:</strong> ${d.name}</p>
-        <p><strong>Категория:</strong> ${d.category}</p>
+        <p><strong>Категория:</strong> ${d.category || '-'}</p>
         <p><strong>Дата загрузки:</strong> ${d.uploadedAt}</p>
         <p><strong>Дата обновления:</strong> ${d.updatedAt}</p>
         <p><strong>Дата истечения:</strong> ${d.expirationDate || '-'}</p>
@@ -190,10 +213,39 @@ document.getElementById('editForm').addEventListener('submit', async function (e
         category: form.category.value,
         expirationDate: form.expirationDate.value || null
     };
-    await fetch(`${api}/update`, {
+    const res = await fetch(`${api}/update`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body)
     });
+    if (!res.ok) {
+        const editingResult = document.getElementById('editingResult');
+        editingResult.innerHTML = ''; 
+        editingResult.classList.remove('success');
+        editingResult.classList.add('error');
+
+        try {
+            const errorData = await res.json();
+            if (errorData.errors && Array.isArray(errorData.errors)) {
+                const errorList = document.createElement('ul');
+                for (const errMsg of errorData.errors) {
+                    const li = document.createElement('li');
+                    li.textContent = errMsg;
+                    errorList.appendChild(li);
+                }
+                editingResult.appendChild(errorList);
+            } else {
+                editingResult.textContent = "Произошла ошибка при загрузке файла.";
+            }
+        } catch (e) {
+            editingResult.textContent = "Ошибка при загрузке файла.";
+        }
+        return;
+    } else {
+        const editingResult = document.getElementById('uploadResult');
+        editingResult.classList.remove('error');
+        editingResult.classList.add('success');
+        editingResult.textContent = "Документ успешно обновлён!";
+    }
     loadAllDocuments();
 });

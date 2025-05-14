@@ -107,18 +107,33 @@ th, td {
     overflow: auto;
     font-size: 0; /* чтобы не было пробелов между inline-block */
 }
-
-.ocr_page {
-    position: relative;
-    display: block;
-    width: 100%;
-    height: auto;
-    background: #fff;
+#uploadResult {
+    margin-top: 10px;
+    padding: 10px;
+    border-radius: 5px;
 }
-
-.ocr_line, .ocrx_word {
-    position: absolute;
-    font-size: 14px;
-    color: black;
-    white-space: nowrap;
+#uploadResult.error {
+    color: #721c24;
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+}
+#uploadResult.success {
+    color: #155724;
+    background-color: #d4edda;
+    border: 1px solid #c3e6cb;
+}
+#editingResult {
+    margin-top: 10px;
+    padding: 10px;
+    border-radius: 5px;
+}
+#editingResult.error {
+    color: #721c24;
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+}
+#editingResult.success {
+    color: #155724;
+    background-color: #d4edda;
+    border: 1px solid #c3e6cb;
 }

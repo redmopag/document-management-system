@@ -102,6 +102,7 @@ public class DocumentServiceImpl implements DocumentService {
         var textContainingDocs = findDocumentsByTextAndUserName(text, username);
         docs.addAll(textContainingDocs);
         return docs.stream()
+                .distinct()
                 .map(DocumentMapper.INSTANCE::toDocumentSummaryResponse)
                 .collect(Collectors.toList());
     }
