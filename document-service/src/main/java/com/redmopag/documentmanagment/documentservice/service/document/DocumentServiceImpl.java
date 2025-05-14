@@ -2,85 +2,66 @@ package com.redmopag.documentmanagment.documentservice.service.document;
 
 import com.redmopag.documentmanagment.common.*;
 import com.redmopag.documentmanagment.documentservice.dto.document.*;
-import com.redmopag.documentmanagment.documentservice.exception.badrequest.*;
+import com.redmopag.documentmanagment.documentservice.dto.document.update.*;
+import com.redmopag.documentmanagment.documentservice.dto.document.upload.UploadDocumentRequest;
+import com.redmopag.documentmanagment.documentservice.exception.badrequest.NotAllowedFileStatusException;
 import com.redmopag.documentmanagment.documentservice.exception.notFound.DocumentNotFoundException;
 import com.redmopag.documentmanagment.documentservice.kafka.producer.DeleteProducer;
 import com.redmopag.documentmanagment.documentservice.model.*;
 import com.redmopag.documentmanagment.documentservice.repository.DocumentRepository;
+import com.redmopag.documentmanagment.documentservice.service.EmitterService;
 import com.redmopag.documentmanagment.documentservice.service.storage.StorageService;
 import com.redmopag.documentmanagment.documentservice.service.text.TextService;
-import com.redmopag.documentmanagment.documentservice.utils.DocumentMapper;
+import com.redmopag.documentmanagment.documentservice.utils.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
-import java.io.IOException;
 import java.time.*;
 import java.util.*;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+//TODO: выделить классы по возможности
 public class DocumentServiceImpl implements DocumentService {
     private final DocumentRepository documentRepository;
     private final DeleteProducer deleteProducer;
     private final StorageService storageService;
     private final TextService textService;
+    private final DocumentValidator documentValidator;
+    private final EmitterService emitterService;
 
     @Override
-    public DocumentSummaryResponse uploadDocument(List <MultipartFile> files,
-                                                  String category,
-                                                  LocalDate expirationDate,
-                                                  String userName) {
-        validateFiles(files);
-        var foundDoc = documentRepository.findByName(files.get(0).getOriginalFilename());
+    public DocumentSummaryResponse uploadDocument(UploadDocumentRequest uploadRequest) {
+        var files = uploadRequest.getFiles();
+        documentValidator.validateFiles(files);
+        Optional<Document> foundDoc = documentRepository.findByName(uploadRequest.getFilename());
         if (foundDoc.isPresent()) {
             return DocumentMapper.INSTANCE.toDocumentSummaryResponse(foundDoc.get());
+        } else {
+            var savedDocument = saveDocument(uploadRequest, files);
+            return DocumentMapper.INSTANCE.toDocumentSummaryResponse(savedDocument);
         }
-        var savedDocument = documentRepository.save(buildDocument(
-                files.get(0).getOriginalFilename(),
-                category,
-                expirationDate,
-                userName));
+    }
+
+    private Document saveDocument(UploadDocumentRequest uploadRequest, List<MultipartFile> files) {
+        var savedDocument = saveMetadata(uploadRequest);
         storageService.upload(savedDocument.getId(), files);
         System.out.println("Сохранён документ: " + savedDocument.getName() + " - " + savedDocument.getId());
-        return DocumentMapper.INSTANCE.toDocumentSummaryResponse(savedDocument);
+        return savedDocument;
     }
 
-    private void validateFiles(List<MultipartFile> files) {
-        if (files == null || files.isEmpty()) {
-            throw new InvalidFileException("Необходимо загрузить хотя бы один файл.");
-        }
-        boolean allImages = isAllImages(files);
-        boolean isSinglePdf = isSinglePdf(files);
-        if (!allImages && !isSinglePdf) {
-            throw new InvalidFileException("Разрешается загрузка либо одного PDF-файла, либо нескольких изображений.");
-        }
-    }
-
-    private boolean isAllImages(List<MultipartFile> files) {
-        return files.stream().allMatch(f ->
-                f.getContentType() != null && f.getContentType().startsWith("image/"));
-    }
-
-    private boolean isSinglePdf(List<MultipartFile> files) {
-        return files.size() == 1 &&
-                files.get(0).getContentType() != null &&
-                files.get(0).getContentType().equals("application/pdf");
-    }
-
-    private Document buildDocument(String name, String category,
-                                   LocalDate expirationDate, String userName) {
-        return Document.builder()
-                .name(name)
+    private Document saveMetadata(UploadDocumentRequest uploadRequest) {
+        return documentRepository.save(Document.builder()
                 .status(DocumentStatus.PROCESSING)
-                .category(category)
-                .expirationDate(expirationDate)
-                .userName(userName)
-                .build();
+                .category(uploadRequest.getCategory())
+                .expirationDate(uploadRequest.getExpirationDate())
+                .userName(uploadRequest.getUsername())
+                .name(uploadRequest.getFilename())
+                .build());
     }
 
     @Override
@@ -114,6 +95,7 @@ public class DocumentServiceImpl implements DocumentService {
         return details;
     }
 
+    // TODO: вынести фильтрацию по имени в text-service
     @Override
     public List<DocumentSummaryResponse> findDocumentByText(String username, String text) {
         var docs = documentRepository.findAllByNameContainingAndUserName(text, username);
@@ -182,7 +164,8 @@ public class DocumentServiceImpl implements DocumentService {
             var deletedFile = new DeletedFile(doc.getId(), doc.getObjectKey());
             deleteProducer.fileDeleted(deletedFile);
             documentRepository.deleteById(id);
-        } catch (DocumentNotFoundException ignored){}
+        } catch (DocumentNotFoundException ignored) {
+        }
     }
 
     @Transactional
@@ -201,32 +184,13 @@ public class DocumentServiceImpl implements DocumentService {
         documentRepository.save(doc);
     }
 
-    private final List<SseEmitter> emitters = new CopyOnWriteArrayList<>();
-
     @Override
     public SseEmitter registerEmitter() {
-        SseEmitter emitter = new SseEmitter((long) Integer.MAX_VALUE);
-        emitter.onTimeout(() -> emitters.remove(emitter));
-        emitter.onCompletion(() -> emitters.remove(emitter));
-        emitters.add(emitter);
-        return emitter;
+        return emitterService.registerEmitter();
     }
 
     private void notifyStatusChange(Long documentId, DocumentStatus status) {
         StatusChanged statusChanged = new StatusChanged(documentId, status);
-        for (var emitter : emitters) {
-            try {
-                sendNotification(emitter, "status-update", statusChanged);
-            } catch (Exception e) {
-                emitters.remove(emitter);
-            }
-        }
-    }
-
-    private synchronized void sendNotification(SseEmitter emitter, String eventName,
-                                               StatusChanged statusChanged) throws IOException {
-        emitter.send(SseEmitter.event()
-                .name(eventName)
-                .data(statusChanged));
+        emitterService.notifyEmitter(statusChanged, "status-update");
     }
 }

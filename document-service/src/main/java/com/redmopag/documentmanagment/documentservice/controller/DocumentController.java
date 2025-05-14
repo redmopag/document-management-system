@@ -1,17 +1,20 @@
 package com.redmopag.documentmanagment.documentservice.controller;
 
 import com.redmopag.documentmanagment.documentservice.dto.document.*;
+import com.redmopag.documentmanagment.documentservice.dto.document.update.UpdateMetadataRequest;
+import com.redmopag.documentmanagment.documentservice.dto.document.upload.UploadDocumentRequest;
 import com.redmopag.documentmanagment.documentservice.service.document.DocumentService;
-import org.springframework.format.annotation.DateTimeFormat;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
-import java.time.LocalDate;
 import java.util.List;
 
+@Validated
 @RestController
 @RequestMapping("/documents")
 @CrossOrigin(origins = "http://127.0.0.1:5500")
@@ -25,14 +28,8 @@ public class DocumentController {
     @PostMapping("/upload")
     @ResponseStatus(HttpStatus.CREATED)
     public DocumentSummaryResponse uploadDocument(
-            @RequestParam("files") List<MultipartFile> files,
-            @RequestParam(value = "category", required = false) String category,
-            @RequestParam(value = "expirationDate", required = false)
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate expirationDate,
-            @RequestParam("username") String userName,
-            @RequestParam("filename") String fileName)
-            throws IOException {
-        return documentService.uploadDocument(files, category, expirationDate, userName);
+            @Valid @ModelAttribute UploadDocumentRequest uploadRequest) throws IOException {
+        return documentService.uploadDocument(uploadRequest);
     }
 
     @GetMapping("/all")
@@ -43,7 +40,7 @@ public class DocumentController {
 
     @GetMapping("/details")
     @ResponseStatus(HttpStatus.OK)
-    public DocumentDetailsResponse getDocumentDetails(@RequestParam("id") Long id) {
+    public DocumentDetailsResponse getDocumentDetails(@RequestParam("id") @Min(1) Long id) {
         return documentService.getDocumentDetails(id);
     }
 
@@ -57,13 +54,13 @@ public class DocumentController {
 
     @DeleteMapping("delete")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteDocument(@RequestParam("id") Long id) {
+    public void deleteDocument(@RequestParam("id") @Min(1) Long id) {
         documentService.deleteDocument(id);
     }
 
     @PatchMapping("/update")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void updateDocumentMetadata(@RequestBody UpdateMetadataRequest request) {
+    public void updateDocumentMetadata(@RequestBody @Valid UpdateMetadataRequest request) {
         documentService.updateDocument(request);
     }
 

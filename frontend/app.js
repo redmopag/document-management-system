@@ -47,6 +47,7 @@ document.getElementById('uploadForm').addEventListener('submit', async function 
 
     const docType = document.getElementById('docType').value;
     const username = document.getElementById('uploadUsername').value;
+    const filename = document.querySelector('input[name="filename"]').value;
     const category = document.querySelector('input[name="category"]').value;
     const expirationDate = document.querySelector('input[name="expirationDate"]').value;
 
@@ -67,6 +68,7 @@ document.getElementById('uploadForm').addEventListener('submit', async function 
     if (category) data.append('category', category);
     if (expirationDate) data.append('expirationDate', expirationDate);
     data.append('username', username);
+    data.append('filename', filename);
 
     const res = await fetch(`${api}/upload`, {
         method: 'POST',

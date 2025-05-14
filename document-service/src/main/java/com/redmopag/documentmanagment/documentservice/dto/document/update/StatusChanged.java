@@ -1,4 +1,4 @@
-package com.redmopag.documentmanagment.documentservice.dto.document;
+package com.redmopag.documentmanagment.documentservice.dto.document.update;
 
 import com.redmopag.documentmanagment.documentservice.model.DocumentStatus;
 import lombok.*;
