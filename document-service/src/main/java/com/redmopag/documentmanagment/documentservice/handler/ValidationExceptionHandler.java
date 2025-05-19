@@ -1,4 +1,4 @@
-package com.redmopag.documentmanagment.documentservice.advice;
+package com.redmopag.documentmanagment.documentservice.handler;
 
 import com.redmopag.documentmanagment.documentservice.dto.error.ValidationResponse;
 import jakarta.validation.*;

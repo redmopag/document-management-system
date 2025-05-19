@@ -80,7 +80,7 @@ public class DocumentServiceImpl implements DocumentService {
     public DocumentDetailsResponse getDocumentDetails(Long id) {
         Document doc = getDocumentById(id);
         if (!doc.getStatus().equals(DocumentStatus.CONFIRMED)) {
-            throw new NotAllowedFileStatusException("Документ " + doc.getName() + " ещё не обработан");
+            throw new NotAllowedFileStatusException("Файл " + doc.getName() + " ещё не обработан");
         }
         TextResponse docText = textService.getTextById(doc.getTextId());
         String originalDocUrl = storageService.getDownloadUrl(doc.getObjectKey());

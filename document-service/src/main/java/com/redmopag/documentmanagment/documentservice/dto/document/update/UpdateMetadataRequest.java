@@ -13,7 +13,7 @@ public class UpdateMetadataRequest {
     @Min(1)
     private Long id;
 
-    @NotBlank
+    @NotBlank(message = "Имя файла не должно быть пустым")
     private String name;
 
     @Nullable

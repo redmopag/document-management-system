@@ -1,7 +1,6 @@
 package com.redmopag.documentmanagment.ocrservice.service;
 
 import com.redmopag.documentmanagment.common.*;
-import com.redmopag.documentmanagment.ocrservice.client.FileDownloader;
 import com.redmopag.documentmanagment.ocrservice.exception.OcrFailedException;
 import lombok.RequiredArgsConstructor;
 import net.sourceforge.tess4j.*;
@@ -14,14 +13,15 @@ import java.io.File;
 @RequiredArgsConstructor
 public class RusOcrService implements OcrService{
     private final ITesseract tesseract;
-    private final FileDownloader fileDownloader;
+    private final PdfService pdfService;
 
     @Override
     public ProcessTextEvent recognize(OcrFileEvent event) {
-        var downloadFile = downloadFile(event.getDownloadUrl(), event.getFilePostfix());
+        var downloadFile = pdfService.downloadFile(event.getDownloadUrl(), event.getFilePostfix());
         String hocrContent = recognizeText(downloadFile);
         String plainText = Jsoup.parse(hocrContent).text();
         System.out.println("Документ " + event.getFileId() + " распознан");
+        downloadFile.delete();
         return ProcessTextEvent.builder()
                 .fileId(event.getFileId())
                 .objectKey(event.getObjectKey())
@@ -34,14 +34,7 @@ public class RusOcrService implements OcrService{
         try {
             return tesseract.doOCR(tempFile);
         } catch (TesseractException e) {
-            throw new OcrFailedException("Ошибка при распознавании текста: " + e.getMessage());
+            throw new OcrFailedException("Не удалось распознать текст: " + e.getMessage());
         }
-    }
-
-    private File downloadFile(String downloadUrl, String filePostfix) {
-        System.out.println("Скачивание файла по url: " + downloadUrl);
-        File tempFile = fileDownloader.downloadFile(downloadUrl, filePostfix);
-        System.out.println("Скачан файл: " + tempFile.getName());
-        return tempFile;
     }
 }

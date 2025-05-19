@@ -1,15 +1,10 @@
-package com.redmopag.documentmanagment.documentservice.advice;
+package com.redmopag.documentmanagment.documentservice.handler;
 
-import com.redmopag.documentmanagment.documentservice.dto.error.*;
+import com.redmopag.documentmanagment.documentservice.dto.error.ErrorResponse;
 import com.redmopag.documentmanagment.documentservice.exception.badrequest.BadRequestException;
 import com.redmopag.documentmanagment.documentservice.exception.notFound.NotFoundException;
-import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
-import org.springframework.validation.method.MethodValidationException;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.*;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {

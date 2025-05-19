@@ -1,5 +1,6 @@
 package com.redmopag.documentmanagment.ocrservice.advice;
 
+import com.redmopag.documentmanagment.ocrservice.dto.ErrorResponse;
 import com.redmopag.documentmanagment.ocrservice.exception.*;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
